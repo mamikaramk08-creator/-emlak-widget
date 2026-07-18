@@ -43,6 +43,28 @@ function jsonResponse(body, status) {
   });
 }
 
+// Simple per-IP, per-minute rate limit backed by LEADS_KV (no extra infra needed).
+// Fails open (allows the request) if KV is unavailable so an outage never blocks real traffic.
+async function checkRateLimit(env, ip, scope, limit) {
+  if (!env.LEADS_KV || !ip) return true;
+  const bucket = Math.floor(Date.now() / 60000);
+  const key = 'rl:' + scope + ':' + ip + ':' + bucket;
+  let count = 0;
+  try {
+    const current = await env.LEADS_KV.get(key);
+    count = current ? (parseInt(current, 10) || 0) : 0;
+  } catch (e) {
+    return true;
+  }
+  if (count >= limit) return false;
+  try {
+    await env.LEADS_KV.put(key, String(count + 1), { expirationTtl: 70 });
+  } catch (e) {
+    // best-effort; don't block the request just because the counter write failed
+  }
+  return true;
+}
+
 function buildSystemInstruction(agencyName, agencyBlurb) {
   return (
     'You are a friendly, professional real estate assistant chatting with a website visitor ' +
@@ -90,6 +112,12 @@ async function handleChat(request, env) {
     return jsonResponse({ error: 'Unknown tenant' }, 403);
   }
 
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const allowed = await checkRateLimit(env, ip, 'chat', 15);
+  if (!allowed) {
+    return jsonResponse({ error: 'Too many requests, please slow down' }, 429);
+  }
+
   const messages = Array.isArray(body.messages) ? body.messages : [];
   const agencyName = (body.agencyName || 'our team').toString().slice(0, 120);
   const agencyBlurb = (body.agencyBlurb || '').toString().slice(0, 500);
@@ -134,7 +162,12 @@ async function handleChat(request, env) {
     return jsonResponse({ error: 'Upstream error' }, 502);
   }
 
-  const data = await geminiRes.json();
+  let data;
+  try {
+    data = await geminiRes.json();
+  } catch (e) {
+    return jsonResponse({ error: 'Upstream response invalid' }, 502);
+  }
   const reply =
     (data &&
       data.candidates &&
@@ -164,6 +197,12 @@ async function handleLead(request, env) {
 
   if (!env.RESEND_API_KEY) {
     return jsonResponse({ error: 'Server not configured' }, 500);
+  }
+
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const allowed = await checkRateLimit(env, ip, 'lead', 5);
+  if (!allowed) {
+    return jsonResponse({ error: 'Too many requests, please slow down' }, 429);
   }
 
   const agencyName = (body.agencyName || 'Unknown agency').toString().slice(0, 120);

@@ -5,6 +5,9 @@ brand domain — see the plan's domain-strategy notes). No "book a call" ask
 anywhere: the CTA is always the self-serve demo link plus a reply-by-email
 loop, so the entire sales process stays written/async end to end.
 
+`{{DemoLink}}` = `https://mamikaramk08-creator.github.io/-emlak-widget/demo.html`
+(GitHub Pages, live as of 2026-07-18).
+
 ## Email 1
 
 ```
