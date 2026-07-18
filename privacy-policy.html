@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — AI Chat Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<style>
+  :root { --primary: #0B5FFF; --ink: #14161c; --paper: #FAF7F2; --accent: #A9803F; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 40px;
+    border-bottom: 1px solid #ece5d8;
+  }
+  header .logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 21px; color: var(--ink); text-decoration: none; }
+  header a.back { color: #6b6f78; font-size: 13px; text-decoration: none; font-weight: 600; }
+  header a.back:hover { color: var(--ink); }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 24px 90px;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 34px;
+    margin: 0 0 6px;
+  }
+  .updated {
+    color: #888;
+    font-size: 13px;
+    margin: 0 0 40px;
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin: 40px 0 12px;
+  }
+  p, li { font-size: 15px; line-height: 1.7; color: #333; }
+  ul { padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  a { color: var(--primary); }
+  .fill-in {
+    background: #fff3d6;
+    border: 1px solid #e8c477;
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+  .notice {
+    background: #f5efe4;
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 13.5px;
+    color: #555;
+    margin-bottom: 40px;
+  }
+  footer {
+    padding: 24px 40px;
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+    background: #f5efe4;
+    border-top: 1px solid #ece5d8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="demo.html">AI Chat Widget</a>
+  <a class="back" href="demo.html">&larr; Back to demo</a>
+</header>
+
+<main>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: July 19, 2026</p>
+
+  <div class="notice">
+    This is a draft template, not legal advice. Fill in the highlighted <span class="fill-in">[bracketed]</span> fields with your real business details and have it reviewed by a lawyer before relying on it with paying customers, especially for U.S. state-level privacy laws (e.g. CCPA).
+  </div>
+
+  <p>This Privacy Policy explains how <span class="fill-in">[Your Business Legal Name]</span> ("we", "us", "our") collects, uses, and shares information through the AI Chat Widget service ("the Service"), an embeddable chat tool that real estate agencies ("Customers") install on their own websites to talk with their visitors.</p>
+
+  <h2>1. Who this applies to</h2>
+  <p>This policy covers two groups of people:</p>
+  <ul>
+    <li><strong>Customers</strong> — the real estate agencies who subscribe to and install the Service.</li>
+    <li><strong>Visitors</strong> — people who chat with the widget on a Customer's website.</li>
+  </ul>
+
+  <h2>2. Information we collect</h2>
+  <ul>
+    <li><strong>Conversation content</strong> — the messages a Visitor types into the chat widget, and the AI's replies, for the duration of the session.</li>
+    <li><strong>Lead information</strong> — if a Visitor chooses to share it during the conversation: name, phone number, and/or email address, along with what the AI inferred about their intent (e.g. buyer, seller, renter, budget, neighborhood).</li>
+    <li><strong>Technical information</strong> — IP address (used only for spam/abuse rate-limiting), browser type, and timestamps.</li>
+    <li><strong>Customer account information</strong> — the agency name and notification email address a Customer provides when they sign up.</li>
+  </ul>
+  <p>We do not require Visitors to create an account, and we do not knowingly collect more than what is volunteered in the chat.</p>
+
+  <h2>3. How we use this information</h2>
+  <ul>
+    <li>To generate the AI's replies during a chat session.</li>
+    <li>To deliver captured leads (name/phone/email + conversation summary) to the Customer whose website the Visitor was chatting on — this is the core function of the Service.</li>
+    <li>To operate, maintain, and improve the Service, including spam and abuse prevention.</li>
+    <li>To communicate with Customers about their subscription.</li>
+  </ul>
+  <p>We do not sell Visitor or Customer data, and we do not use chat content to train third-party AI models beyond what our AI provider's standard API terms allow (see Section 4).</p>
+
+  <h2>4. Third-party service providers</h2>
+  <p>We use the following providers to operate the Service. Each processes data only as needed to provide their part of the Service, under their own privacy policies:</p>
+  <ul>
+    <li><strong>Google Gemini API</strong> — generates the AI's chat replies from the conversation text.</li>
+    <li><strong>Resend</strong> — delivers captured lead information by email to the Customer.</li>
+    <li><strong>Cloudflare</strong> — hosts the backend (Workers) and, where enabled, stores a backup copy of captured leads (Workers KV) so a Customer can review them later even if an email is missed.</li>
+  </ul>
+
+  <h2>5. Data retention</h2>
+  <p>Conversation sessions are kept in the Visitor's own browser (local storage) so the chat persists across a page refresh, and are cleared when the Visitor clears their browser data. Captured leads stored via Cloudflare KV are retained until the Customer or Visitor requests deletion, or until <span class="fill-in">[your retention period, e.g. 24 months]</span> of inactivity, whichever comes first.</p>
+
+  <h2>6. Cookies and local storage</h2>
+  <p>The widget uses browser local storage (not tracking cookies) solely to remember an in-progress conversation across page reloads. We do not use this to track Visitors across different websites.</p>
+
+  <h2>7. Your rights</h2>
+  <p>Visitors and Customers can request access to, correction of, or deletion of their personal information by contacting us at <a href="mailto:mamikaramk08@gmail.com">mamikaramk08@gmail.com</a>. Depending on your location, you may have additional rights under laws such as the CCPA or GDPR; we will honor applicable requests.</p>
+
+  <h2>8. Children's privacy</h2>
+  <p>The Service is intended for adults engaging with real estate agencies and is not directed at children under 13. We do not knowingly collect information from children.</p>
+
+  <h2>9. Changes to this policy</h2>
+  <p>We may update this Privacy Policy from time to time. Material changes will be reflected by updating the "Last updated" date above.</p>
+
+  <h2>10. Contact us</h2>
+  <p>Questions about this policy: <a href="mailto:mamikaramk08@gmail.com">mamikaramk08@gmail.com</a>.</p>
+</main>
+
+<footer>
+  &copy; 2026 <span class="fill-in">[Your Business Legal Name]</span> &middot; AI Chat Widget
+</footer>
+
+</body>
+</html>
