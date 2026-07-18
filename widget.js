@@ -1,218 +1,291 @@
 /*!
- * Real Estate AI Chat Widget — Cloudflare Worker proxy
- *
- * Deploy once (Cloudflare dashboard, paste this file, no OAuth needed).
- * Set these secrets/vars in the Worker's Settings > Variables:
- *   GEMINI_API_KEY   - your Google Gemini API key
- *   RESEND_API_KEY   - your Resend API key
- *
- * Endpoints:
- *   POST /chat  { tenantId, messages, agencyName, agencyBlurb } -> { reply }
- *   POST /lead  { tenantId, agencyName, name, contact, role, budget, location, bedrooms, sourceUrl } -> { ok }
+ * Real Estate AI Chat Widget
+ * Embed with:
+ *   <script>
+ *     window.RealEstateWidgetConfig = {
+ *       agencyName: "ABC Realty",
+ *       primaryColor: "#0B5FFF",
+ *       proxyBaseUrl: "https://your-worker.workers.dev",
+ *       tenantId: "your-tenant-id"
+ *     };
+ *   </script>
+ *   <script src="https://.../widget.js"></script>
  */
+(function () {
+  if (window.__realEstateWidgetLoaded) return;
+  window.__realEstateWidgetLoaded = true;
 
-const GEMINI_MODEL = 'gemini-flash-lite-latest';
+  var cfg = window.RealEstateWidgetConfig || {};
+  var agencyName = cfg.agencyName || 'our team';
+  var agencyBlurb = cfg.agencyBlurb || '';
+  var primaryColor = cfg.primaryColor || '#0B5FFF';
+  var logoUrl = cfg.logoUrl || '';
+  var proxyBaseUrl = (cfg.proxyBaseUrl || '').replace(/\/+$/, '');
+  var tenantId = cfg.tenantId || '';
 
-// Onboarding a new customer = add one line here, then redeploy (paste into Cloudflare dashboard > Deploy).
-const TENANTS = {
-  'skyline-demo': { notifyEmail: 'mamikaramk08@gmail.com' }
-  // 'customer-slug': { notifyEmail: 'customer@example.com' }
-};
-
-function corsHeaders() {
-  return {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
-  };
-}
-
-function jsonResponse(body, status) {
-  return new Response(JSON.stringify(body), {
-    status: status || 200,
-    headers: Object.assign({ 'Content-Type': 'application/json' }, corsHeaders())
-  });
-}
-
-function buildSystemInstruction(agencyName, agencyBlurb) {
-  return (
-    'You are a friendly, professional real estate assistant chatting with a website visitor ' +
-    'on behalf of "' + agencyName + '"' +
-    (agencyBlurb ? (', described as: ' + agencyBlurb) : '') +
-    '. Your goals, in natural conversational order, are to find out:\n' +
-    '1. Whether the visitor is a buyer, seller, or renter.\n' +
-    '2. Their approximate budget.\n' +
-    '3. Their preferred neighborhood or area.\n' +
-    '4. The number of bedrooms they need (skip this if they are a seller).\n' +
-    'Ask ONE question at a time, keep replies short (1-3 sentences), and sound warm and human, ' +
-    'not like a form. Once you have their role, budget, and location (and bedrooms if relevant), ' +
-    "ask for their name and best phone number or email so the team can follow up, and tell them " +
-    "someone from " + agencyName + " will contact them soon.\n" +
-    'IMPORTANT: As soon as you have collected a name AND a phone number or email address, append ' +
-    'this exact hidden marker at the very end of your reply, on its own, with real values filled in ' +
-    'as compact single-line JSON (the visitor will never see this marker, it is stripped automatically):\n' +
-    '<<<LEAD:{"name":"...","contact":"...","role":"buyer|seller|renter","budget":"...","location":"...","bedrooms":"..."}>>>\n' +
-    'Only include the marker once, in your final closing message, and never mention it to the visitor.'
-  );
-}
-
-async function handleChat(request, env) {
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return jsonResponse({ error: 'Invalid JSON body' }, 400);
+  if (!proxyBaseUrl) {
+    console.error('[RealEstateWidget] RealEstateWidgetConfig.proxyBaseUrl is required.');
+    return;
   }
 
-  const tenantId = (body.tenantId || '').toString().slice(0, 100);
-  const tenant = TENANTS[tenantId];
-  if (!tenant) {
-    return jsonResponse({ error: 'Unknown tenant' }, 403);
+  if (!tenantId) {
+    console.error('[RealEstateWidget] RealEstateWidgetConfig.tenantId is required.');
+    return;
   }
 
-  const messages = Array.isArray(body.messages) ? body.messages : [];
-  const agencyName = (body.agencyName || 'our team').toString().slice(0, 120);
-  const agencyBlurb = (body.agencyBlurb || '').toString().slice(0, 500);
+  // ---------- Styles ----------
+  var style = document.createElement('style');
+  style.setAttribute('data-rew', 'true');
+  style.textContent =
+    '.rew-bubble{position:fixed;bottom:20px;right:20px;width:60px;height:60px;border-radius:50%;' +
+    'background:' + primaryColor + ';box-shadow:0 4px 16px rgba(0,0,0,.2);border:none;cursor:pointer;' +
+    'display:flex;align-items:center;justify-content:center;z-index:2147483000;transition:transform .15s ease;}' +
+    '.rew-bubble:hover{transform:scale(1.06);}' +
+    '.rew-bubble svg{width:28px;height:28px;fill:#fff;}' +
+    '.rew-panel{position:fixed;bottom:92px;right:20px;width:380px;max-width:calc(100vw - 32px);height:600px;' +
+    'max-height:calc(100vh - 120px);background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.22);' +
+    'display:none;flex-direction:column;overflow:hidden;z-index:2147483000;' +
+    'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}' +
+    '.rew-panel.rew-open{display:flex;}' +
+    '.rew-header{background:' + primaryColor + ';color:#fff;padding:16px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0;}' +
+    '.rew-header-logo{width:32px;height:32px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.2);}' +
+    '.rew-header-text{flex:1;min-width:0;}' +
+    '.rew-header-title{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}' +
+    '.rew-header-sub{font-size:12px;opacity:.85;}' +
+    '.rew-close{background:transparent;border:none;color:#fff;cursor:pointer;padding:4px;opacity:.85;flex-shrink:0;}' +
+    '.rew-close:hover{opacity:1;}' +
+    '.rew-close svg{width:20px;height:20px;fill:currentColor;}' +
+    '.rew-messages{flex:1;overflow-y:auto;padding:16px;background:#f7f8fa;display:flex;flex-direction:column;gap:10px;}' +
+    '.rew-msg{max-width:82%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-wrap:break-word;}' +
+    '.rew-msg-assistant{background:#fff;color:#1a1a1a;border:1px solid #e7e8ec;border-bottom-left-radius:4px;align-self:flex-start;}' +
+    '.rew-msg-user{background:' + primaryColor + ';color:#fff;border-bottom-right-radius:4px;align-self:flex-end;}' +
+    '.rew-typing{align-self:flex-start;display:flex;gap:4px;padding:12px 14px;background:#fff;border:1px solid #e7e8ec;border-radius:14px;border-bottom-left-radius:4px;}' +
+    '.rew-typing span{width:6px;height:6px;border-radius:50%;background:#b7bac2;animation:rewBlink 1.2s infinite ease-in-out;}' +
+    '.rew-typing span:nth-child(2){animation-delay:.2s;}' +
+    '.rew-typing span:nth-child(3){animation-delay:.4s;}' +
+    '@keyframes rewBlink{0%,80%,100%{opacity:.3;}40%{opacity:1;}}' +
+    '.rew-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid #eceef1;background:#fff;flex-shrink:0;}' +
+    '.rew-input{flex:1;border:1px solid #dcdfe4;border-radius:20px;padding:10px 14px;font-size:14px;outline:none;resize:none;' +
+    'font-family:inherit;max-height:90px;}' +
+    '.rew-input:focus{border-color:' + primaryColor + ';}' +
+    '.rew-send{background:' + primaryColor + ';border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;' +
+    'flex-shrink:0;display:flex;align-items:center;justify-content:center;}' +
+    '.rew-send:disabled{opacity:.5;cursor:default;}' +
+    '.rew-send svg{width:18px;height:18px;fill:#fff;margin-left:2px;}' +
+    '.rew-footer{text-align:center;font-size:10px;color:#b0b3ba;padding:4px 0 8px;background:#fff;flex-shrink:0;}' +
+    '@media (max-width:480px){' +
+    '.rew-panel{bottom:0;right:0;left:0;top:0;width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0;}' +
+    '.rew-bubble{bottom:16px;right:16px;}' +
+    '}';
+  document.head.appendChild(style);
 
-  if (!env.GEMINI_API_KEY) {
-    return jsonResponse({ error: 'Server not configured' }, 500);
+  // ---------- DOM ----------
+  var bubble = document.createElement('button');
+  bubble.className = 'rew-bubble';
+  bubble.setAttribute('aria-label', 'Open chat');
+  bubble.innerHTML =
+    '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.02 2 11c0 2.61 1.28 4.94 3.33 6.58L5 22l4.86-2.02c.68.13 1.4.2 2.14.2 5.52 0 10-4.02 10-9S17.52 2 12 2z"/></svg>';
+
+  var panel = document.createElement('div');
+  panel.className = 'rew-panel';
+
+  var logoHtml = logoUrl
+    ? '<img class="rew-header-logo" src="' + escapeAttr(logoUrl) + '" alt="">'
+    : '';
+
+  panel.innerHTML =
+    '<div class="rew-header">' +
+      logoHtml +
+      '<div class="rew-header-text">' +
+        '<div class="rew-header-title">' + escapeHtml(agencyName) + '</div>' +
+        '<div class="rew-header-sub">Typically replies in a few minutes</div>' +
+      '</div>' +
+      '<button class="rew-close" aria-label="Close chat">' +
+        '<svg viewBox="0 0 24 24"><path d="M18.3 5.71L12 12.01l-6.29-6.3-1.42 1.42 6.3 6.29-6.3 6.29 1.42 1.42 6.29-6.3 6.29 6.3 1.42-1.42-6.3-6.29 6.3-6.29z"/></svg>' +
+      '</button>' +
+    '</div>' +
+    '<div class="rew-messages" id="rew-messages"></div>' +
+    '<div class="rew-input-row">' +
+      '<textarea class="rew-input" id="rew-input" rows="1" placeholder="Type your message..."></textarea>' +
+      '<button class="rew-send" id="rew-send" aria-label="Send">' +
+        '<svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>' +
+      '</button>' +
+    '</div>' +
+    '<div class="rew-footer">Powered by AI &middot; ' + escapeHtml(agencyName) + '</div>';
+
+  document.body.appendChild(bubble);
+  document.body.appendChild(panel);
+
+  var messagesEl = panel.querySelector('#rew-messages');
+  var inputEl = panel.querySelector('#rew-input');
+  var sendBtn = panel.querySelector('#rew-send');
+  var closeBtn = panel.querySelector('.rew-close');
+
+  // ---------- State ----------
+  var history = []; // {role: 'user'|'assistant', content: string}
+  var isOpen = false;
+  var isSending = false;
+  var leadSent = false;
+
+  // ---------- Helpers ----------
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+  function escapeAttr(str) {
+    return escapeHtml(str);
+  }
+  function scrollToBottom() {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+  function appendMessage(role, text) {
+    var div = document.createElement('div');
+    div.className = 'rew-msg ' + (role === 'user' ? 'rew-msg-user' : 'rew-msg-assistant');
+    div.innerHTML = escapeHtml(text).replace(/\n/g, '<br>');
+    messagesEl.appendChild(div);
+    scrollToBottom();
+  }
+  function showTyping() {
+    var div = document.createElement('div');
+    div.className = 'rew-typing';
+    div.id = 'rew-typing-indicator';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    messagesEl.appendChild(div);
+    scrollToBottom();
+  }
+  function hideTyping() {
+    var el = document.getElementById('rew-typing-indicator');
+    if (el) el.remove();
   }
 
-  const contents = messages
-    .filter(function (m) { return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'; })
-    .slice(-20)
-    .map(function (m) {
-      return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] };
-    });
+  var LEAD_MARKER_RE = /<<<LEAD:([\s\S]*?)>>>/;
 
-  const geminiUrl =
-    'https://generativelanguage.googleapis.com/v1beta/models/' +
-    GEMINI_MODEL +
-    ':generateContent?key=' +
-    encodeURIComponent(env.GEMINI_API_KEY);
+  function extractLead(reply) {
+    var match = reply.match(LEAD_MARKER_RE);
+    if (!match) return { cleanReply: reply, lead: null };
+    var cleanReply = reply.replace(LEAD_MARKER_RE, '').trim();
+    var lead = null;
+    try {
+      lead = JSON.parse(match[1]);
+    } catch (e) {
+      lead = null;
+    }
+    return { cleanReply: cleanReply, lead: lead };
+  }
 
-  const geminiPayload = {
-    systemInstruction: {
-      parts: [{ text: buildSystemInstruction(agencyName, agencyBlurb) }]
-    },
-    contents: contents,
-    generationConfig: { temperature: 0.7, maxOutputTokens: 500, thinkingConfig: { thinkingBudget: 0 } }
-  };
-
-  let geminiRes;
-  try {
-    geminiRes = await fetch(geminiUrl, {
+  function sendLead(lead) {
+    if (leadSent) return;
+    leadSent = true;
+    fetch(proxyBaseUrl + '/lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(geminiPayload)
-    });
-  } catch (e) {
-    return jsonResponse({ error: 'Upstream request failed' }, 502);
-  }
-
-  if (!geminiRes.ok) {
-    return jsonResponse({ error: 'Upstream error' }, 502);
-  }
-
-  const data = await geminiRes.json();
-  const reply =
-    (data &&
-      data.candidates &&
-      data.candidates[0] &&
-      data.candidates[0].content &&
-      data.candidates[0].content.parts &&
-      data.candidates[0].content.parts[0] &&
-      data.candidates[0].content.parts[0].text) ||
-    "Sorry, I couldn't come up with a reply just now — could you rephrase that?";
-
-  return jsonResponse({ reply: reply });
-}
-
-async function handleLead(request, env) {
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return jsonResponse({ error: 'Invalid JSON body' }, 400);
-  }
-
-  const tenantId = (body.tenantId || '').toString().slice(0, 100);
-  const tenant = TENANTS[tenantId];
-  if (!tenant) {
-    return jsonResponse({ error: 'Unknown tenant' }, 403);
-  }
-
-  if (!env.RESEND_API_KEY) {
-    return jsonResponse({ error: 'Server not configured' }, 500);
-  }
-
-  const agencyName = (body.agencyName || 'Unknown agency').toString().slice(0, 120);
-  const name = (body.name || '').toString().slice(0, 200);
-  const contact = (body.contact || '').toString().slice(0, 200);
-  const role = (body.role || '').toString().slice(0, 50);
-  const budget = (body.budget || '').toString().slice(0, 100);
-  const location = (body.location || '').toString().slice(0, 200);
-  const bedrooms = (body.bedrooms || '').toString().slice(0, 50);
-  const sourceUrl = (body.sourceUrl || '').toString().slice(0, 500);
-
-  const escapeHtml = function (s) {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  };
-
-  const html =
-    '<h2>New lead from ' + escapeHtml(agencyName) + '</h2>' +
-    '<table cellpadding="6" style="border-collapse:collapse">' +
-    '<tr><td><b>Name</b></td><td>' + escapeHtml(name) + '</td></tr>' +
-    '<tr><td><b>Contact</b></td><td>' + escapeHtml(contact) + '</td></tr>' +
-    '<tr><td><b>Role</b></td><td>' + escapeHtml(role) + '</td></tr>' +
-    '<tr><td><b>Budget</b></td><td>' + escapeHtml(budget) + '</td></tr>' +
-    '<tr><td><b>Location</b></td><td>' + escapeHtml(location) + '</td></tr>' +
-    '<tr><td><b>Bedrooms</b></td><td>' + escapeHtml(bedrooms) + '</td></tr>' +
-    '<tr><td><b>Source page</b></td><td>' + escapeHtml(sourceUrl) + '</td></tr>' +
-    '</table>';
-
-  let resendRes;
-  try {
-    resendRes = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + env.RESEND_API_KEY,
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev',
-        to: tenant.notifyEmail,
-        subject: 'New real estate lead — ' + agencyName,
-        html: html
+        tenantId: tenantId,
+        agencyName: agencyName,
+        sourceUrl: window.location.href,
+        name: lead.name || '',
+        contact: lead.contact || '',
+        role: lead.role || '',
+        budget: lead.budget || '',
+        location: lead.location || '',
+        bedrooms: lead.bedrooms || ''
       })
+    }).catch(function () {
+      // best-effort; conversation already succeeded for the visitor
     });
-  } catch (e) {
-    return jsonResponse({ error: 'Email send failed' }, 502);
   }
 
-  if (!resendRes.ok) {
-    return jsonResponse({ error: 'Email send failed' }, 502);
+  function setSending(sending) {
+    isSending = sending;
+    sendBtn.disabled = sending;
+    inputEl.disabled = sending;
   }
 
-  return jsonResponse({ ok: true });
-}
+  function sendMessage(text) {
+    if (!text.trim() || isSending) return;
+    appendMessage('user', text);
+    history.push({ role: 'user', content: text });
+    inputEl.value = '';
+    autoGrow();
+    setSending(true);
+    showTyping();
 
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders() });
-    }
-
-    if (request.method === 'POST' && url.pathname === '/chat') {
-      return handleChat(request, env);
-    }
-
-    if (request.method === 'POST' && url.pathname === '/lead') {
-      return handleLead(request, env);
-    }
-
-    return jsonResponse({ error: 'Not found' }, 404);
+    fetch(proxyBaseUrl + '/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tenantId: tenantId,
+        messages: history,
+        agencyName: agencyName,
+        agencyBlurb: agencyBlurb
+      })
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('bad status ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        hideTyping();
+        var raw = data.reply || '';
+        var extracted = extractLead(raw);
+        history.push({ role: 'assistant', content: raw });
+        if (extracted.cleanReply) {
+          appendMessage('assistant', extracted.cleanReply);
+        }
+        if (extracted.lead) {
+          sendLead(extracted.lead);
+        }
+      })
+      .catch(function () {
+        hideTyping();
+        appendMessage(
+          'assistant',
+          "Sorry, I'm having trouble connecting right now. Please leave your name and best phone number or email here and " +
+            escapeHtml(agencyName) +
+            ' will reach out to you directly.'
+        );
+      })
+      .finally(function () {
+        setSending(false);
+      });
   }
-};
+
+  function autoGrow() {
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 90) + 'px';
+  }
+
+  function openPanel() {
+    isOpen = true;
+    panel.classList.add('rew-open');
+    if (history.length === 0) {
+      var greeting =
+        "Hi! I'm here to help with your real estate search. Are you looking to buy, sell, or rent?";
+      appendMessage('assistant', greeting);
+      history.push({ role: 'assistant', content: greeting });
+    }
+    inputEl.focus();
+  }
+  function closePanel() {
+    isOpen = false;
+    panel.classList.remove('rew-open');
+  }
+
+  bubble.addEventListener('click', function () {
+    isOpen ? closePanel() : openPanel();
+  });
+  closeBtn.addEventListener('click', closePanel);
+  sendBtn.addEventListener('click', function () {
+    sendMessage(inputEl.value);
+  });
+  inputEl.addEventListener('input', autoGrow);
+  inputEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(inputEl.value);
+    }
+  });
+})();
