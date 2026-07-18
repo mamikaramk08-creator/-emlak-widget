@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Paneli</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f7f8fa;
+    color: #1a1a1a;
+    padding: 32px 20px;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 20px; margin-bottom: 20px; }
+  .form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e7e8ec;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .form input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 12px;
+    border: 1px solid #dcdfe4;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  .form button {
+    background: #0B5FFF;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .form button:disabled { opacity: .5; cursor: default; }
+  #status { font-size: 13px; color: #666; margin-bottom: 14px; }
+  #status.error { color: #d32f2f; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid #e7e8ec;
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 13px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #eceef1;
+    vertical-align: top;
+  }
+  th { background: #f7f8fa; font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .empty { text-align: center; color: #999; padding: 40px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Lead Paneli</h1>
+  <div class="form">
+    <input type="text" id="proxyBaseUrl" placeholder="Worker URL (ör. https://realestate-widget-api.xxx.workers.dev)">
+    <input type="text" id="tenantId" placeholder="Tenant ID (ör. skyline-demo)">
+    <input type="password" id="adminKey" placeholder="Admin Key">
+    <button id="fetchBtn">Getir</button>
+  </div>
+  <div id="status"></div>
+  <table id="table" style="display:none">
+    <thead>
+      <tr>
+        <th>Tarih</th>
+        <th>İsim</th>
+        <th>İletişim</th>
+        <th>Rol</th>
+        <th>Bütçe</th>
+        <th>Konum</th>
+        <th>Yatak Odası</th>
+        <th>Kaynak Sayfa</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div id="empty" class="empty" style="display:none">Henüz lead yok.</div>
+</div>
+
+<script>
+(function () {
+  var proxyInput = document.getElementById('proxyBaseUrl');
+  var tenantInput = document.getElementById('tenantId');
+  var keyInput = document.getElementById('adminKey');
+  var btn = document.getElementById('fetchBtn');
+  var statusEl = document.getElementById('status');
+  var table = document.getElementById('table');
+  var tbody = document.getElementById('tbody');
+  var emptyEl = document.getElementById('empty');
+
+  ['proxyBaseUrl', 'tenantId', 'adminKey'].forEach(function (key) {
+    var saved = localStorage.getItem('rewAdmin_' + key);
+    if (saved) document.getElementById(key).value = saved;
+  });
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleString('tr-TR');
+  }
+
+  function fetchLeads() {
+    var proxyBaseUrl = proxyInput.value.trim().replace(/\/+$/, '');
+    var tenantId = tenantInput.value.trim();
+    var adminKey = keyInput.value.trim();
+
+    if (!proxyBaseUrl || !tenantId || !adminKey) {
+      statusEl.textContent = 'Lütfen tüm alanları doldurun.';
+      statusEl.className = 'error';
+      return;
+    }
+
+    localStorage.setItem('rewAdmin_proxyBaseUrl', proxyBaseUrl);
+    localStorage.setItem('rewAdmin_tenantId', tenantId);
+    localStorage.setItem('rewAdmin_adminKey', adminKey);
+
+    btn.disabled = true;
+    statusEl.textContent = 'Yükleniyor...';
+    statusEl.className = '';
+    table.style.display = 'none';
+    emptyEl.style.display = 'none';
+
+    var url = proxyBaseUrl + '/leads?tenantId=' + encodeURIComponent(tenantId) + '&key=' + encodeURIComponent(adminKey);
+
+    fetch(url)
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        var leads = data.leads || [];
+        statusEl.textContent = leads.length + ' lead bulundu.';
+        statusEl.className = '';
+        if (leads.length === 0) {
+          emptyEl.style.display = 'block';
+          return;
+        }
+        tbody.innerHTML = leads.map(function (l) {
+          return '<tr>' +
+            '<td>' + escapeHtml(formatDate(l.receivedAt)) + '</td>' +
+            '<td>' + escapeHtml(l.name) + '</td>' +
+            '<td>' + escapeHtml(l.contact) + '</td>' +
+            '<td>' + escapeHtml(l.role) + '</td>' +
+            '<td>' + escapeHtml(l.budget) + '</td>' +
+            '<td>' + escapeHtml(l.location) + '</td>' +
+            '<td>' + escapeHtml(l.bedrooms) + '</td>' +
+            '<td>' + escapeHtml(l.sourceUrl) + '</td>' +
+          '</tr>';
+        }).join('');
+        table.style.display = 'table';
+      })
+      .catch(function (err) {
+        statusEl.textContent = 'Hata: leadler alınamadı (' + err.message + '). Admin key veya tenant ID hatalı olabilir.';
+        statusEl.className = 'error';
+      })
+      .finally(function () {
+        btn.disabled = false;
+      });
+  }
+
+  btn.addEventListener('click', fetchLeads);
+  [proxyInput, tenantInput, keyInput].forEach(function (el) {
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') fetchLeads();
+    });
+  });
+})();
+</script>
+</body>
+</html>

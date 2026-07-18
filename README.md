@@ -17,6 +17,8 @@ just pastes two `<script>` tags into their site.
   `widget.js`, which runs in every visitor's browser.
 - `demo.html` — a fake agency landing page with the real widget embedded, for
   demoing to prospects.
+- `admin.html` — a simple lead-viewing dashboard (host this publicly too, or
+  just open it locally). Lets you pull stored leads for a tenant.
 
 ## 1. Deploy the Worker (one-time setup)
 
@@ -26,10 +28,13 @@ just pastes two `<script>` tags into their site.
    "Hello World" worker.
 3. Click **Edit code**, delete everything, paste in the contents of
    `worker.js`, then **Deploy**.
-4. Go to **Settings → Variables and Secrets** on the worker and add two
+4. Go to **Settings → Variables and Secrets** on the worker and add three
    secrets (encrypt them):
    - `GEMINI_API_KEY` — your Google Gemini API key
    - `RESEND_API_KEY` — your Resend API key (sign up free at resend.com)
+   - `ADMIN_KEY` — any secret string you make up yourself (e.g. a long random
+     password). This protects the `/leads` dashboard endpoint below — anyone
+     with this key can read stored leads, so keep it private.
 5. Note the worker's URL, shown at the top of the dashboard:
    `https://realestate-widget-api.<your-subdomain>.workers.dev`
 
@@ -58,6 +63,26 @@ real customer**, since their leads otherwise silently fail to arrive.
 5. Test it: trigger a `/lead` request (e.g. run through the demo chat) and
    confirm the email actually arrives at the tenant's real `notifyEmail`
    address, not just your own account email.
+
+### Storing leads + the admin dashboard (recommended)
+
+By default, leads are only ever delivered by email — if an email bounces,
+gets lost, or lands in spam, that lead is gone for good. Adding a Cloudflare
+KV namespace stores every lead as a backup you can browse anytime with
+`admin.html`.
+
+1. In the Cloudflare dashboard, go to **Storage & Databases → KV** → **Create
+   namespace**. Name it anything, e.g. `realestate-leads`.
+2. Go back to your Worker → **Settings → Bindings** → **Add binding** → **KV
+   namespace**. Set the variable name to exactly `LEADS_KV` and select the
+   namespace you just created. Save.
+3. Make sure you've also added the `ADMIN_KEY` secret from step 4 above.
+4. Open `admin.html` (locally, or host it wherever you host `widget.js`) and
+   fill in your worker URL, a `tenantId`, and your `ADMIN_KEY` — click
+   **Getir** to see that tenant's stored leads.
+
+If `LEADS_KV` isn't bound, everything still works exactly as before (email
+only) — the Worker skips KV storage silently.
 
 ### Adding a new customer (tenant)
 
@@ -130,3 +155,12 @@ Every field except `proxyBaseUrl`, `tenantId`, and `agencyName` is optional.
 4. Resize the browser to a phone width to confirm the panel goes full-screen.
 5. Temporarily set `proxyBaseUrl` to a bad URL to confirm the widget shows a
    graceful fallback message instead of breaking.
+6. Click one of the quick-reply buttons (Buying/Selling/Renting) shown after
+   the opening greeting and confirm it sends that reply.
+7. Refresh the page mid-conversation and confirm the chat history is still
+   there (session persistence).
+8. Leave the page open without clicking the bubble for ~8 seconds and confirm
+   a small red pulse appears on it.
+9. If you've set up `LEADS_KV` and `ADMIN_KEY`, open `admin.html`, enter the
+   worker URL / tenant ID / admin key, and confirm the test lead you just
+   generated shows up in the table.

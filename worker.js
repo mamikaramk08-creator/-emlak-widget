@@ -5,10 +5,14 @@
  * Set these secrets/vars in the Worker's Settings > Variables:
  *   GEMINI_API_KEY   - your Google Gemini API key
  *   RESEND_API_KEY   - your Resend API key
+ *   ADMIN_KEY        - a secret you make up, protects the /leads endpoint
+ * Bind a KV namespace named LEADS_KV in Settings > Bindings (stores leads
+ * so they're recoverable even if an email is lost, and viewable in admin.html).
  *
  * Endpoints:
- *   POST /chat  { tenantId, messages, agencyName, agencyBlurb } -> { reply }
- *   POST /lead  { tenantId, agencyName, name, contact, role, budget, location, bedrooms, sourceUrl } -> { ok }
+ *   POST /chat   { tenantId, messages, agencyName, agencyBlurb } -> { reply }
+ *   POST /lead   { tenantId, agencyName, name, contact, role, budget, location, bedrooms, sourceUrl } -> { ok }
+ *   GET  /leads  ?tenantId=...&key=ADMIN_KEY -> { leads: [...] }
  */
 
 const GEMINI_MODEL = 'gemini-flash-lite-latest';
@@ -27,7 +31,7 @@ const FROM_EMAIL = 'onboarding@resend.dev';
 function corsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type'
   };
 }
@@ -53,6 +57,17 @@ function buildSystemInstruction(agencyName, agencyBlurb) {
     'not like a form. Once you have their role, budget, and location (and bedrooms if relevant), ' +
     "ask for their name and best phone number or email so the team can follow up, and tell them " +
     "someone from " + agencyName + " will contact them soon.\n" +
+    'LANGUAGE: Always reply in the same language the visitor is using. If their first message is in ' +
+    'Turkish, reply in Turkish from then on; if it is in English, reply in English; and so on for any ' +
+    'other language. Never switch language on your own.\n' +
+    'DO NOT REPEAT QUESTIONS: Before asking something, check the conversation so far — if the visitor ' +
+    'already gave that piece of information (even if they volunteered several things at once in a single ' +
+    'message), do not ask for it again. Skip straight to the next unanswered question.\n' +
+    'ACKNOWLEDGE, THEN ASK: Briefly acknowledge what the visitor just told you in your own words before ' +
+    'asking the next question, so the conversation feels natural rather than like a form being filled in.\n' +
+    'OFF-TOPIC MESSAGES: If the visitor asks something unrelated to real estate (small talk, unrelated ' +
+    'questions, etc.), answer briefly and politely, then gently steer the conversation back to whichever ' +
+    'question is still unanswered.\n' +
     'IMPORTANT: As soon as you have collected a name AND a phone number or email address, append ' +
     'this exact hidden marker at the very end of your reply, on its own, with real values filled in ' +
     'as compact single-line JSON (the visitor will never see this marker, it is stripped automatically):\n' +
@@ -199,7 +214,62 @@ async function handleLead(request, env) {
     return jsonResponse({ error: 'Email send failed' }, 502);
   }
 
+  if (env.LEADS_KV) {
+    try {
+      const leadRecord = {
+        name: name,
+        contact: contact,
+        role: role,
+        budget: budget,
+        location: location,
+        bedrooms: bedrooms,
+        sourceUrl: sourceUrl,
+        agencyName: agencyName,
+        receivedAt: new Date().toISOString()
+      };
+      const leadKey = tenantId + ':' + Date.now() + ':' + Math.random().toString(36).slice(2, 10);
+      await env.LEADS_KV.put(leadKey, JSON.stringify(leadRecord));
+    } catch (e) {
+      // best-effort; the email already went out successfully
+    }
+  }
+
   return jsonResponse({ ok: true });
+}
+
+async function handleLeads(request, env) {
+  const url = new URL(request.url);
+  const tenantId = (url.searchParams.get('tenantId') || '').toString().slice(0, 100);
+  const key = url.searchParams.get('key') || '';
+
+  if (!env.ADMIN_KEY || key !== env.ADMIN_KEY) {
+    return jsonResponse({ error: 'Forbidden' }, 403);
+  }
+
+  if (!TENANTS[tenantId]) {
+    return jsonResponse({ error: 'Unknown tenant' }, 403);
+  }
+
+  if (!env.LEADS_KV) {
+    return jsonResponse({ error: 'Lead storage not configured' }, 500);
+  }
+
+  const list = await env.LEADS_KV.list({ prefix: tenantId + ':', limit: 200 });
+  const values = await Promise.all(list.keys.map(function (k) { return env.LEADS_KV.get(k.name); }));
+
+  const leads = values
+    .filter(Boolean)
+    .map(function (v) {
+      try {
+        return JSON.parse(v);
+      } catch (e) {
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .sort(function (a, b) { return (b.receivedAt || '').localeCompare(a.receivedAt || ''); });
+
+  return jsonResponse({ leads: leads });
 }
 
 export default {
@@ -216,6 +286,10 @@ export default {
 
     if (request.method === 'POST' && url.pathname === '/lead') {
       return handleLead(request, env);
+    }
+
+    if (request.method === 'GET' && url.pathname === '/leads') {
+      return handleLeads(request, env);
     }
 
     return jsonResponse({ error: 'Not found' }, 404);

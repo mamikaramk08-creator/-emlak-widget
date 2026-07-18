@@ -33,6 +33,16 @@
     return;
   }
 
+  // ---------- Session persistence ----------
+  var storageKey = 'rew_session_' + tenantId;
+  var savedSession = null;
+  try {
+    var rawSession = sessionStorage.getItem(storageKey);
+    if (rawSession) savedSession = JSON.parse(rawSession);
+  } catch (e) {
+    savedSession = null;
+  }
+
   // ---------- Styles ----------
   var style = document.createElement('style');
   style.setAttribute('data-rew', 'true');
@@ -73,6 +83,14 @@
     '.rew-send:disabled{opacity:.5;cursor:default;}' +
     '.rew-send svg{width:18px;height:18px;fill:#fff;margin-left:2px;}' +
     '.rew-footer{text-align:center;font-size:10px;color:#b0b3ba;padding:4px 0 8px;background:#fff;flex-shrink:0;}' +
+    '.rew-quick-replies{display:flex;flex-wrap:wrap;gap:8px;align-self:flex-start;max-width:82%;}' +
+    '.rew-quick-reply{background:#fff;border:1px solid ' + primaryColor + ';color:' + primaryColor + ';' +
+    'border-radius:16px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;}' +
+    '.rew-quick-reply:hover{background:' + primaryColor + ';color:#fff;}' +
+    '.rew-bubble-attention{position:fixed;}' +
+    '.rew-bubble-attention::after{content:"";position:absolute;top:2px;right:2px;width:12px;height:12px;' +
+    'border-radius:50%;background:#ff4444;box-shadow:0 0 0 2px #fff;animation:rewPulse 1.6s infinite;}' +
+    '@keyframes rewPulse{0%{transform:scale(.8);opacity:1;}70%{transform:scale(1.6);opacity:0;}100%{opacity:0;}}' +
     '@media (max-width:480px){' +
     '.rew-panel{bottom:0;right:0;left:0;top:0;width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0;}' +
     '.rew-bubble{bottom:16px;right:16px;}' +
@@ -122,10 +140,18 @@
   var closeBtn = panel.querySelector('.rew-close');
 
   // ---------- State ----------
-  var history = []; // {role: 'user'|'assistant', content: string}
+  var history = (savedSession && Array.isArray(savedSession.history)) ? savedSession.history : []; // {role: 'user'|'assistant', content: string}
   var isOpen = false;
   var isSending = false;
-  var leadSent = false;
+  var leadSent = (savedSession && savedSession.leadSent) || false;
+
+  function persistSession() {
+    try {
+      sessionStorage.setItem(storageKey, JSON.stringify({ history: history, leadSent: leadSent }));
+    } catch (e) {
+      // best-effort; not critical if it fails (e.g. storage disabled)
+    }
+  }
 
   // ---------- Helpers ----------
   function escapeHtml(str) {
@@ -161,6 +187,33 @@
     if (el) el.remove();
   }
 
+  function removeQuickReplies() {
+    var el = document.getElementById('rew-quick-replies');
+    if (el) el.remove();
+  }
+  function appendQuickReplies() {
+    var wrap = document.createElement('div');
+    wrap.className = 'rew-quick-replies';
+    wrap.id = 'rew-quick-replies';
+    [
+      { label: 'Buying', text: "I'm looking to buy" },
+      { label: 'Selling', text: "I'm looking to sell" },
+      { label: 'Renting', text: "I'm looking to rent" }
+    ].forEach(function (opt) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'rew-quick-reply';
+      btn.textContent = opt.label;
+      btn.addEventListener('click', function () {
+        removeQuickReplies();
+        sendMessage(opt.text);
+      });
+      wrap.appendChild(btn);
+    });
+    messagesEl.appendChild(wrap);
+    scrollToBottom();
+  }
+
   var LEAD_MARKER_RE = /<<<LEAD:([\s\S]*?)>>>/;
 
   function extractLead(reply) {
@@ -179,6 +232,7 @@
   function sendLead(lead) {
     if (leadSent) return;
     leadSent = true;
+    persistSession();
     fetch(proxyBaseUrl + '/lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -206,8 +260,10 @@
 
   function sendMessage(text) {
     if (!text.trim() || isSending) return;
+    removeQuickReplies();
     appendMessage('user', text);
     history.push({ role: 'user', content: text });
+    persistSession();
     inputEl.value = '';
     autoGrow();
     setSending(true);
@@ -232,6 +288,7 @@
         var raw = data.reply || '';
         var extracted = extractLead(raw);
         history.push({ role: 'assistant', content: raw });
+        persistSession();
         if (extracted.cleanReply) {
           appendMessage('assistant', extracted.cleanReply);
         }
@@ -261,11 +318,15 @@
   function openPanel() {
     isOpen = true;
     panel.classList.add('rew-open');
+    clearTimeout(attentionTimer);
+    bubble.classList.remove('rew-bubble-attention');
     if (history.length === 0) {
       var greeting =
         "Hi! I'm here to help with your real estate search. Are you looking to buy, sell, or rent?";
       appendMessage('assistant', greeting);
       history.push({ role: 'assistant', content: greeting });
+      persistSession();
+      appendQuickReplies();
     }
     inputEl.focus();
   }
@@ -273,6 +334,23 @@
     isOpen = false;
     panel.classList.remove('rew-open');
   }
+
+  // Restore any conversation from earlier in this browser tab session.
+  if (history.length > 0) {
+    history.forEach(function (m) {
+      if (m.role === 'assistant') {
+        var extracted = extractLead(m.content);
+        if (extracted.cleanReply) appendMessage('assistant', extracted.cleanReply);
+      } else {
+        appendMessage('user', m.content);
+      }
+    });
+  }
+
+  // Give the bubble a brief attention pulse if the visitor hasn't opened the panel yet.
+  var attentionTimer = setTimeout(function () {
+    if (!isOpen) bubble.classList.add('rew-bubble-attention');
+  }, 8000);
 
   bubble.addEventListener('click', function () {
     isOpen ? closePanel() : openPanel();
