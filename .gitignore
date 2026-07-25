@@ -2,3 +2,5 @@
 .claude/
 .claude-flow/
 node_modules/
+
+graphify-out/
