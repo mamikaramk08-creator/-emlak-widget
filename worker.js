@@ -144,7 +144,7 @@ async function handleChat(request, env) {
       parts: [{ text: buildSystemInstruction(agencyName, agencyBlurb) }]
     },
     contents: contents,
-    generationConfig: { temperature: 0.7, maxOutputTokens: 500, thinkingConfig: { thinkingBudget: 0 } }
+    generationConfig: { temperature: 0.7, maxOutputTokens: 500 }
   };
 
   let geminiRes;
@@ -159,6 +159,8 @@ async function handleChat(request, env) {
   }
 
   if (!geminiRes.ok) {
+    const errText = await geminiRes.text().catch(function () { return ''; });
+    console.error('Gemini error', geminiRes.status, errText);
     return jsonResponse({ error: 'Upstream error' }, 502);
   }
 
