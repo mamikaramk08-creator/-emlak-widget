@@ -415,6 +415,12 @@
       });
     }, { threshold: 0.15 });
     document.querySelectorAll('.reveal').forEach(function (el) { revealObserver.observe(el); });
+    window.addEventListener('load', function () {
+      document.querySelectorAll('.reveal:not(.is-visible)').forEach(function (el) {
+        revealObserver.unobserve(el);
+        revealObserver.observe(el);
+      });
+    });
   }
 </script>
 
