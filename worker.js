@@ -23,10 +23,7 @@ const TENANTS = {
   // 'customer-slug': { notifyEmail: 'customer@example.com' }
 };
 
-// In Resend sandbox mode, leads can only be delivered to the Resend account owner's
-// own verified email, regardless of `to`. Once you verify a sending domain at
-// resend.com/domains, change this to an address on that domain, e.g. 'leads@youragency.com'.
-const FROM_EMAIL = 'onboarding@resend.dev';
+const FROM_EMAIL = 'leads@notify.getboxagent.com';
 
 function corsHeaders() {
   return {
