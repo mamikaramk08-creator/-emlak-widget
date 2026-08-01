@@ -1,28 +1,40 @@
 # Cold Email Sequence — US Real Estate Brokerages
 
-Two emails, sent via GMass from the warmed-up outreach domain (not the
-brand domain — see the plan's domain-strategy notes). No "book a call" ask
-anywhere: the CTA is always the self-serve demo link plus a reply-by-email
-loop, so the entire sales process stays written/async end to end.
+> **2026-07-31 — expanded to 4 touches, links removed from the automated
+> sequence, CTA switched to reply-gated video.** Per
+> `us-plan-agustos-2026.md`: only a video link goes out in the manual reply
+> once a prospect says "send it" — no calendar/call-booking link anywhere
+> in this flow, closing happens async via checkout. None of the 4 automated
+> touches below carry a hyperlink, including the company/product name.
+> Cadence: day 0 / 2-3 / 5-7 / 10-14 (Instantly Benchmark 2026 / Saleshandy:
+> 42% of replies come from follow-ups, 3-5 step sequences hit 8.3% reply
+> rate vs 4.1% for single-touch). Cap sends at 30/mailbox/day, stop at 2%
+> bounce — see `cold-email-gonderim-limitleri-2026.md`.
 
-GMass merge tags use single curly braces and must match the sheet's column
-headers exactly (case-sensitive) — not the double-brace `{{Tag}}` syntax
-Instantly uses. Sheet columns: `FirstName`, `AgencyName`, `SenderName`.
-`DemoLink` isn't a per-row column — either add it as a column with the same
-value on every row, or hardcode the URL below since it's the same for everyone.
+**Merge tag note:** this file was originally written for GMass
+(single-brace `{Tag}`, case-sensitive, must match sheet columns exactly).
+The active campaign draft ("TX Real Estate Brokerages" / "Keyleads") is now
+set up in **Instantly**, which uses double-brace `{{Tag}}` syntax — swap
+`{FirstName}` → `{{firstName}}` etc. when pasting these into Instantly's
+sequence editor. Sheet/lead-list columns needed either way: `FirstName`,
+`AgencyName`, `SenderName`.
 
-`{DemoLink}` = `https://mamikaramk08-creator.github.io/-emlak-widget/demo.html`
-(GitHub Pages, live as of 2026-07-18).
+**CAN-SPAM:** every email below ends with a physical mailing address —
+required for commercial email (up to $51,744 per email, not per campaign).
+Address in use: `Atatürk Bulvarı No:155, Nazilli/Aydın, Türkiye`. The manual unsubscribe line was removed:
+Instantly's account/campaign-level auto-appended opt-out link (Settings →
+Compliance) is being used instead, so confirm that's enabled before
+sending to avoid shipping with no opt-out at all.
 
-## Email 1
+---
+
+## Email 1 — Day 0
 
 ### Subject line variants (A/B/C test)
 
 Body stays identical across all three — only the subject line changes.
-Split the batch evenly across the three variants using your sending
-tool's split-test feature (check whether it auto-rotates or needs manual
-list segmentation), then track open rate and reply rate per variant
-before picking a winner for the next batch.
+Split the batch evenly across the three variants, track open rate and
+reply rate per variant before picking a winner for the next batch.
 
 - **A — Curiosity/question (baseline):**
   `Quick question about missed leads on {AgencyName}'s website`
@@ -31,8 +43,8 @@ before picking a winner for the next batch.
 - **C — Direct/benefit-led:**
   `A 5-minute fix for {AgencyName}'s website leads`
 
-Body below is variant A's subject line; swap in B or C from above when
-setting up the GMass split test — do not send this note itself.
+Body below is variant A's subject line; swap in B or C when setting up the
+split test — do not send this note itself.
 
 ```
 Subject: Quick question about missed leads on {AgencyName}'s website
@@ -40,33 +52,75 @@ Subject: Quick question about missed leads on {AgencyName}'s website
 Hi {FirstName},
 
 I noticed {AgencyName}'s site doesn't have a live chat — most visitors who
-aren't ready to call just leave, and that's lead volume you're already paying
-for (SEO/ads) but never capturing.
+aren't ready to call just leave, and that's lead volume you're already
+paying for (SEO/ads) but never capturing.
 
-I built a simple AI chat widget made for real estate sites: it figures out if
-a visitor is buying, selling, or renting, asks about budget/area, then emails
-you their name and contact info right away. No CRM to learn — it installs
-with one script tag and is live in under 5 minutes.
+I put together a short video showing exactly how an AI chat widget would
+work on {AgencyName}'s site — figures out if a visitor's buying, selling,
+or renting, asks about budget/area, then gets you their contact info right
+away.
 
-You can try the live demo yourself here, no signup needed: {DemoLink}
-
-If it looks useful, just reply to this email and I'll get {AgencyName} set
-up.
+Want me to send it over?
 
 {SenderName}
+
+Atatürk Bulvarı No:155, Nazilli/Aydın, Türkiye
 ```
 
-## Email 2 (sent 3 days later if no reply)
+## Email 2 — Day 2-3
 
 ```
 Subject: Re: Quick question about missed leads on {AgencyName}'s website
 
 Hi {FirstName},
 
-Following up in case this got buried — here's that live demo again:
-{DemoLink}
+Following up in case this got buried.
 
-Takes about 60 seconds to try. Happy to answer anything right here by email.
+Still happy to send that short video showing how it'd work on
+{AgencyName}'s site — just reply "send it" and I'll get it over to you.
 
 {SenderName}
+
+Atatürk Bulvarı No:155, Nazilli/Aydın, Türkiye
+```
+
+## Email 3 — Day 5-7 (new angle)
+
+Shifts from "your website" to "your inbox" — the second half of the
+combined offer, not just a repeat of email 1/2.
+
+```
+Subject: The other half of this — your inbox, not just your site
+
+Hi {FirstName},
+
+Quick add to my last note: the same system also covers the other side —
+when a lead emails {AgencyName} directly, it reads the email, drafts a
+reply, and flags anything that looks like a hot lead so it doesn't sit
+behind newsletters and CC threads.
+
+Still happy to send the short video walkthrough if it's useful — just say
+the word.
+
+{SenderName}
+
+Atatürk Bulvarı No:155, Nazilli/Aydın, Türkiye
+```
+
+## Email 4 — Day 10-14 (breakup)
+
+```
+Subject: Should I stop reaching out?
+
+Hi {FirstName},
+
+Haven't heard back, so I'll assume the timing isn't right — I'll stop
+following up after this one.
+
+If missed leads (on the site or in the inbox) ever become a priority for
+{AgencyName}, just reply to this email and I'll send over the video.
+
+{SenderName}
+
+Atatürk Bulvarı No:155, Nazilli/Aydın, Türkiye
 ```
