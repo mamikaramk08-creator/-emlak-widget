@@ -421,7 +421,7 @@
   <h1>Find your next home in the city you love</h1>
   <p>Skyline Realty Group helps buyers, sellers, and renters navigate the market with confidence. Chat with us now — bottom right — and we'll help you get started.</p>
   <div class="cta-group">
-    <a class="cta" href="#">Chat with us</a>
+    <a class="cta" href="#" id="hero-chat-cta">Chat with us</a>
     <a class="cta-secondary" href="https://getboxagent.com/#pricing">See pricing</a>
   </div>
 </section>
@@ -525,6 +525,13 @@
   };
 </script>
 <script src="https://cdn.jsdelivr.net/gh/mamikaramk08-creator/-emlak-widget@main/widget.js"></script>
+<script>
+  document.getElementById('hero-chat-cta').addEventListener('click', function (e) {
+    e.preventDefault();
+    var bubble = document.querySelector('.rew-bubble');
+    if (bubble) bubble.click();
+  });
+</script>
 
 </body>
 </html>
