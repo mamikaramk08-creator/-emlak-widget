@@ -63,7 +63,10 @@
   .hero {
     padding: 150px 40px 120px;
     text-align: center;
-    background: linear-gradient(160deg, #FAF7F2 0%, #F3E9D8 55%, #EADFC7 100%);
+    overflow: hidden;
+    background:
+      radial-gradient(rgba(20,22,28,.06) 1px, transparent 1px) 0 0/24px 24px,
+      linear-gradient(160deg, #FAF7F2 0%, #F3E9D8 55%, #EADFC7 100%);
   }
   .hero .eyebrow { color: #A9803F; }
   .hero h1 {
@@ -82,7 +85,26 @@
     margin: 0 auto 36px;
   }
   .hero .cta-group { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 44px; }
-  .hero-widget-mock { width: 340px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.35); text-align: left; }
+  .hero-widget-wrap { position: relative; width: 340px; margin: 0 auto; }
+  .hwm-glow {
+    position: absolute;
+    inset: -70px -90px;
+    background: radial-gradient(circle, rgba(11,95,255,.22) 0%, rgba(169,128,63,.16) 45%, transparent 72%);
+    filter: blur(36px);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .hero-widget-mock { position: relative; z-index: 1; width: 340px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 30px 70px rgba(11,20,40,.28), 0 8px 20px rgba(11,20,40,.12); text-align: left; }
+  .hero-widget-mock-ghost {
+    position: absolute;
+    top: 26px;
+    left: 40px;
+    z-index: 0;
+    opacity: .4;
+    filter: blur(1.5px) saturate(.75);
+    transform: rotate(-4deg) scale(.92);
+    box-shadow: 0 20px 44px rgba(11,20,40,.18);
+  }
   .hwm-header { background: var(--primary); color: #fff; padding: 14px 18px; display: flex; align-items: center; gap: 10px; }
   .hwm-header .hwm-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; flex-shrink: 0; }
   .hwm-header strong { display: block; font-size: 14px; }
@@ -240,17 +262,32 @@
     <a class="cta" href="#pricing">Start free trial</a>
     <a class="cta-secondary" href="https://mamikaramk08-creator.github.io/-emlak-widget/demo.html">See it in action</a>
   </div>
-  <div class="hero-widget-mock" aria-hidden="true">
-    <div class="hwm-header">
-      <span class="hwm-dot"></span>
-      <div>
-        <strong>Website Chat Widget</strong>
-        <span>Typically replies in a few minutes</span>
+  <div class="hero-widget-wrap">
+    <div class="hwm-glow" aria-hidden="true"></div>
+    <div class="hero-widget-mock hero-widget-mock-ghost" aria-hidden="true">
+      <div class="hwm-header">
+        <span class="hwm-dot"></span>
+        <div>
+          <strong>Inbox Triage</strong>
+          <span>Drafting a reply&hellip;</span>
+        </div>
+      </div>
+      <div class="hwm-body">
+        <div class="hwm-bubble">Hi, I'd like a valuation for my property on Maple St.</div>
       </div>
     </div>
-    <div class="hwm-body">
-      <div class="hwm-bubble">Hi! I'm here to help with your real estate search. Are you looking to buy, sell, or rent?</div>
-      <div class="hwm-chips"><span>Buying</span><span>Selling</span><span>Renting</span></div>
+    <div class="hero-widget-mock" aria-hidden="true">
+      <div class="hwm-header">
+        <span class="hwm-dot"></span>
+        <div>
+          <strong>Website Chat Widget</strong>
+          <span>Typically replies in a few minutes</span>
+        </div>
+      </div>
+      <div class="hwm-body">
+        <div class="hwm-bubble">Hi! I'm here to help with your real estate search. Are you looking to buy, sell, or rent?</div>
+        <div class="hwm-chips"><span>Buying</span><span>Selling</span><span>Renting</span></div>
+      </div>
     </div>
   </div>
 </section>
