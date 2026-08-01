@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>getboxagent — Your website and your inbox, answered automatically</title>
 <meta name="description" content="AI chat for your website and AI triage for your inbox — leads sorted and sent to you automatically. Built for real estate brokerages.">
+<link rel="canonical" href="https://getboxagent.com/">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B5FFF'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='34' font-weight='700' fill='white' text-anchor='middle'%3Eg%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://getboxagent.com/">
+<meta property="og:title" content="getboxagent — Your website and your inbox, answered automatically">
+<meta property="og:description" content="AI chat for your website and AI triage for your inbox — leads sorted and sent to you automatically. Built for real estate brokerages.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="getboxagent — Your website and your inbox, answered automatically">
+<meta name="twitter:description" content="AI chat for your website and AI triage for your inbox — leads sorted and sent to you automatically. Built for real estate brokerages.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
@@ -31,7 +40,7 @@
   }
   header .logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 21px; color: var(--ink); text-decoration: none; }
   nav { display: flex; align-items: center; gap: 28px; }
-  nav a { text-decoration: none; color: #6b6f78; font-size: 13px; font-weight: 600; letter-spacing: .02em; }
+  nav a { text-decoration: none; color: #6b6f78; font-size: 13px; font-weight: 600; letter-spacing: .02em; transition: color .2s ease; }
   nav a:hover { color: var(--ink); }
   nav a.nav-cta {
     border: 1.5px solid var(--ink);
@@ -39,6 +48,7 @@
     padding: 9px 18px;
     border-radius: 2px;
     font-weight: 600;
+    transition: background .2s ease, color .2s ease;
   }
   nav a.nav-cta:hover { background: var(--ink); color: #fff; }
   .eyebrow {
@@ -51,11 +61,11 @@
     margin-bottom: 14px;
   }
   .hero {
-    padding: 120px 40px 100px;
+    padding: 150px 40px 120px;
     text-align: center;
     background:
-      radial-gradient(circle at 50% 0%, rgba(11,95,255,.10) 0%, rgba(11,95,255,0) 55%),
-      linear-gradient(180deg, #0f1220 0%, #181c2c 100%);
+      linear-gradient(180deg, rgba(10,16,32,.80) 0%, rgba(10,16,32,.52) 45%, rgba(8,13,26,.85) 100%),
+      url('https://images.pexels.com/photos/7587880/pexels-photo-7587880.jpeg?auto=compress&cs=tinysrgb&w=1920') center/cover no-repeat;
   }
   .hero .eyebrow { color: #A9803F; }
   .hero h1 {
@@ -74,6 +84,15 @@
     margin: 0 auto 36px;
   }
   .hero .cta-group { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 44px; }
+  .hero-widget-mock { width: 340px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.35); text-align: left; }
+  .hwm-header { background: var(--primary); color: #fff; padding: 14px 18px; display: flex; align-items: center; gap: 10px; }
+  .hwm-header .hwm-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; flex-shrink: 0; }
+  .hwm-header strong { display: block; font-size: 14px; }
+  .hwm-header span { display: block; font-size: 11px; opacity: .85; }
+  .hwm-body { padding: 18px; }
+  .hwm-bubble { background: #F1F3F8; color: var(--ink); font-size: 13px; line-height: 1.5; padding: 12px 14px; border-radius: 12px; margin-bottom: 12px; }
+  .hwm-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hwm-chips span { border: 1px solid var(--primary); color: var(--primary); font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 999px; }
   .cta {
     display: inline-block;
     background: var(--primary);
@@ -82,7 +101,9 @@
     border-radius: 8px;
     text-decoration: none;
     font-weight: 600;
+    transition: background .2s ease, transform .15s ease;
   }
+  .cta:hover { background: #0a52dd; transform: translateY(-1px); }
   .cta-secondary {
     display: inline-block;
     background: transparent;
@@ -92,7 +113,9 @@
     border-radius: 8px;
     text-decoration: none;
     font-weight: 600;
+    transition: background .2s ease, border-color .2s ease;
   }
+  .cta-secondary:hover { background: rgba(255,255,255,.1); border-color: #fff; }
   .stats-bar { margin-top: -56px; padding: 0 20px; position: relative; z-index: 2; text-align: center; }
   .trust-strip {
     display: inline-flex;
@@ -123,7 +146,8 @@
     font-size: 15px;
   }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
-  .card { border: 1px solid #ece5d8; border-radius: 12px; background: #fff; padding: 26px; }
+  .card { border: 1px solid #ece5d8; border-radius: 12px; background: #fff; padding: 26px; transition: transform .15s ease, box-shadow .15s ease; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 16px 32px rgba(15,23,42,.1); }
   .card .kicker { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); margin-bottom: 10px; }
   .card h3 { font-family: 'Playfair Display', serif; font-weight: 600; margin: 0 0 8px; font-size: 18px; }
   .card p { margin: 0; color: #555; font-size: 14.5px; line-height: 1.6; }
@@ -137,8 +161,11 @@
     text-align: center;
     box-shadow: 0 20px 40px rgba(15,23,42,.08);
     position: relative;
+    transition: transform .15s ease, box-shadow .15s ease;
   }
+  .pricing-card:hover { transform: translateY(-3px); box-shadow: 0 26px 48px rgba(15,23,42,.14); }
   .pricing-card.featured { border-color: var(--primary); box-shadow: 0 24px 48px rgba(11,95,255,.16); }
+  .pricing-card.featured:hover { box-shadow: 0 30px 56px rgba(11,95,255,.22); }
   .pricing-card .badge {
     position: absolute;
     top: -13px;
@@ -179,7 +206,10 @@
     background: #f5efe4;
     border-top: 1px solid #ece5d8;
   }
-  footer a { color: #888; text-decoration: none; }
+  .reveal { transition: opacity .4s ease, transform .4s ease; }
+  .js-reveal .reveal { opacity: 0; transform: translateY(10px); }
+  .js-reveal .reveal.is-visible { opacity: 1; transform: none; }
+  footer a { color: #888; text-decoration: none; transition: color .2s ease; }
   footer a:hover { color: var(--ink); }
   @media (max-width: 640px) {
     header { padding: 16px 20px; }
@@ -211,7 +241,20 @@
   <p>An AI chat widget that qualifies every visitor on your site, and an AI assistant that triages your inbox — on their own or together, so every lead lands in front of you sorted, not buried.</p>
   <div class="cta-group">
     <a class="cta" href="#pricing">Get started</a>
-    <a class="cta-secondary" href="https://mamikaramk08-creator.github.io/-emlak-widget/demo.html">See the widget demo</a>
+    <a class="cta-secondary" href="https://mamikaramk08-creator.github.io/-emlak-widget/demo.html">See it in action</a>
+  </div>
+  <div class="hero-widget-mock" aria-hidden="true">
+    <div class="hwm-header">
+      <span class="hwm-dot"></span>
+      <div>
+        <strong>Website Chat Widget</strong>
+        <span>Typically replies in a few minutes</span>
+      </div>
+    </div>
+    <div class="hwm-body">
+      <div class="hwm-bubble">Hi! I'm here to help with your real estate search. Are you looking to buy, sell, or rent?</div>
+      <div class="hwm-chips"><span>Buying</span><span>Selling</span><span>Renting</span></div>
+    </div>
   </div>
 </section>
 
@@ -223,7 +266,7 @@
   </div>
 </div>
 
-<section class="block" id="use-cases">
+<section class="block reveal" id="use-cases">
   <span class="eyebrow" style="text-align:center; display:block;">Why brokerages switch</span>
   <h2>Built for how real estate leads actually come in</h2>
   <p class="lead">Not a generic FAQ bot and not a blind auto-responder — an assistant that understands the situation before it acts.</p>
@@ -246,7 +289,7 @@
   </div>
 </section>
 
-<section class="block" id="how-it-works">
+<section class="block reveal" id="how-it-works">
   <span class="eyebrow" style="text-align:center; display:block;">How it works</span>
   <h2>From click to closed lead in three steps.</h2>
   <div class="grid">
@@ -268,10 +311,15 @@
   </div>
 </section>
 
-<section class="block" id="pricing">
+<section class="block reveal" id="pricing">
   <span class="eyebrow" style="text-align:center; display:block;">Simple, transparent pricing</span>
   <h2>Pick what you need.</h2>
   <p class="lead">Website widget, inbox triage, or both — start with what solves your biggest bottleneck today.</p>
+  <div class="trust-strip" style="margin-bottom: 32px;">
+    <div class="stat"><strong>30 days</strong> money-back guarantee</div>
+    <div class="stat"><strong>$0</strong> setup fee</div>
+    <div class="stat"><strong>Cancel anytime</strong> after 3 months</div>
+  </div>
   <div class="pricing-grid">
     <div class="pricing-card">
       <h3>Website Widget</h3>
@@ -308,14 +356,14 @@
         <li>Leads sorted and sent straight to you</li>
         <li>Live in under 5 minutes, no developer needed</li>
       </ul>
-      <a class="cta" href="mailto:mamikaramk08@gmail.com?subject=Both%20Bundled%20plan">Get started</a>
+      <a class="cta" href="https://buy.polar.sh/polar_cl_aNykpGfZGJ5VFqFWQq0JQMeYJJP4d980ThKq40vn764" target="_blank" rel="noopener">Get started</a>
       <p class="pricing-note">Cancel anytime after the 3-month minimum.</p>
     </div>
   </div>
   <p class="pricing-note" style="text-align:center; margin-top:24px;">Not happy in the first 30 days? Full refund, no questions asked.</p>
 </section>
 
-<section class="block" id="faq">
+<section class="block reveal" id="faq">
   <span class="eyebrow" style="text-align:center; display:block;">Questions</span>
   <h2>Before you switch, the honest answers.</h2>
   <div class="faq-list">
@@ -354,6 +402,21 @@
     <a href="privacy-policy.html">Privacy</a>
   </div>
 </footer>
+
+<script>
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('js-reveal');
+    var revealObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(function (el) { revealObserver.observe(el); });
+  }
+</script>
 
 </body>
 </html>
