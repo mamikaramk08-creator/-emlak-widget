@@ -18,9 +18,25 @@
 const GEMINI_MODEL = 'gemini-flash-lite-latest';
 
 // Onboarding a new customer = add one line here, then redeploy (paste into Cloudflare dashboard > Deploy).
+//
+// Optional per-tenant fields, both recommended for real customers:
+//   agencyName / agencyBlurb - when set, these win over whatever the browser
+//     sends. The tenantId is public (it sits in the embed snippet on the
+//     customer's own site), so without this anyone can drive the bot under
+//     the customer's brand with their own prompt text.
+//   allowedOrigins - array of exact origins allowed to call /chat and /lead
+//     for this tenant, e.g. ['https://acmerealty.com']. Omit it and any
+//     origin is accepted (this is what keeps demo.html working from file://).
+//
+// Never put ':' in a tenant slug — lead keys in KV are prefixed `slug:` and a
+// slug containing ':' would let one tenant's prefix match another's leads.
 const TENANTS = {
   'skyline-demo': { notifyEmail: 'mamikaramk08@gmail.com' }
-  // 'customer-slug': { notifyEmail: 'customer@example.com' }
+  // 'customer-slug': {
+  //   notifyEmail: 'customer@example.com',
+  //   agencyName: 'Acme Realty',
+  //   allowedOrigins: ['https://acmerealty.com', 'https://www.acmerealty.com']
+  // }
 };
 
 const FROM_EMAIL = 'leads@notify.getboxagent.com';
@@ -60,6 +76,15 @@ async function checkRateLimit(env, ip, scope, limit) {
     // best-effort; don't block the request just because the counter write failed
   }
   return true;
+}
+
+// ponytail: Origin is trivially forged outside a browser, so this only stops
+// drive-by abuse from other websites, not a determined script. A real fix
+// needs a per-tenant signed token issued at page load.
+function originAllowed(request, tenant) {
+  if (!tenant.allowedOrigins) return true;
+  const origin = request.headers.get('Origin');
+  return !!origin && tenant.allowedOrigins.indexOf(origin) !== -1;
 }
 
 function buildSystemInstruction(agencyName, agencyBlurb) {
@@ -109,6 +134,10 @@ async function handleChat(request, env) {
     return jsonResponse({ error: 'Unknown tenant' }, 403);
   }
 
+  if (!originAllowed(request, tenant)) {
+    return jsonResponse({ error: 'Origin not allowed for this tenant' }, 403);
+  }
+
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   const allowed = await checkRateLimit(env, ip, 'chat', 15);
   if (!allowed) {
@@ -116,8 +145,10 @@ async function handleChat(request, env) {
   }
 
   const messages = Array.isArray(body.messages) ? body.messages : [];
-  const agencyName = (body.agencyName || 'our team').toString().slice(0, 120);
-  const agencyBlurb = (body.agencyBlurb || '').toString().slice(0, 500);
+  // Tenant config wins over the browser: the prompt is not caller-controlled
+  // for any tenant that has agencyName/agencyBlurb configured.
+  const agencyName = (tenant.agencyName || body.agencyName || 'our team').toString().slice(0, 120);
+  const agencyBlurb = (tenant.agencyBlurb || body.agencyBlurb || '').toString().slice(0, 500);
 
   if (!env.GEMINI_API_KEY) {
     return jsonResponse({ error: 'Server not configured' }, 500);
@@ -192,6 +223,10 @@ async function handleLead(request, env) {
   const tenant = TENANTS[tenantId];
   if (!tenant) {
     return jsonResponse({ error: 'Unknown tenant' }, 403);
+  }
+
+  if (!originAllowed(request, tenant)) {
+    return jsonResponse({ error: 'Origin not allowed for this tenant' }, 403);
   }
 
   if (!env.RESEND_API_KEY) {
@@ -309,6 +344,8 @@ async function handleLeads(request, env) {
 
   return jsonResponse({ leads: leads });
 }
+
+export { originAllowed, TENANTS };
 
 export default {
   async fetch(request, env) {

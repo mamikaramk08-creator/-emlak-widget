@@ -5,7 +5,11 @@ node_modules/
 
 graphify-out/
 
-# Prospect data. This repo is PUBLIC (jsDelivr serves widget.js from it),
-# so real names/emails must never be committed.
-outreach/*.csv
-outreach/*.xlsx
+# This repo is PUBLIC — it has to be: jsDelivr only serves public repos, and
+# demo.html / demo-inject.js load widget.js from cdn.jsdelivr.net.
+#
+# So nothing commercial lives here. The whole outreach/ folder (lead data,
+# cold email templates, pricing strategy, reply playbook) is local-only — a
+# prospect who searches a phrase from one of our emails must not land on our
+# playbook. Only what the widget itself needs is tracked.
+outreach/
