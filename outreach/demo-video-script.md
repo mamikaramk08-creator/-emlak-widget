@@ -33,26 +33,20 @@ real through the Cloudflare Worker.
 
 1. Open their homepage. Grab their brand color — right-click their main
    button → Inspect → copy the hex.
-2. Open the console (`F12`) and paste:
-
-```js
-window.RealEstateWidgetConfig = {
-  agencyName: "Acme Realty",                       // ← their name
-  agencyBlurb: "a residential real estate agency in Austin, TX", // ← theirs
-  primaryColor: "#0B5FFF",                         // ← their hex
-  proxyBaseUrl: "https://realestate-widget-api.mamikaramk08.workers.dev",
-  tenantId: "skyline-demo"
-};
-var s = document.createElement('script');
-s.src = "https://cdn.jsdelivr.net/gh/mamikaramk08-creator/-emlak-widget@main/widget.js";
-document.body.appendChild(s);
-```
-
+2. Open `demo-inject.js`, edit the three marked lines (name, blurb,
+   color), paste the whole file into the console (`F12`), Enter.
    `tenantId` stays `skyline-demo` — that's the only tenant the worker
    knows (`worker.js:22`), and it routes the captured lead to
    `mamikaramk08@gmail.com`, which is exactly what you want for Beat 4.
-
 3. Rehearse the chat once with the recorder off. Then record.
+
+### Picking who to record
+
+Any brokerage from the batch-1 list works, but the first take goes
+faster on a site that's a plain WordPress/Wix/IDX template — no CSP, no
+cookie wall, a hero image that reads as "real agency" on camera. Skip
+anything on a heavy SPA or behind a consent banner you'd have to dismiss
+on camera. Grab the name/site straight from `leads-batch1-send.csv`.
 
 ### If the widget doesn't appear
 
@@ -234,7 +228,25 @@ pre-build these.
 
 ---
 
-## 4. Fallback: the generic version
+## 4. Pre-flight — run this list before you hit record
+
+- [ ] Clean browser window: no bookmarks bar, no extra tabs, no
+      extensions in the toolbar
+- [ ] Gmail open in tab 2, inbox filtered so the lead mail is the only
+      thing that moves on screen
+- [ ] Page zoom 100%, window 1280x720
+- [ ] Widget injected and the bubble is visible (`demo-inject.js`)
+- [ ] Chat rehearsed once end to end — the bot must actually reach the
+      "someone from {their agency} will contact you" close, otherwise no
+      lead email fires and Beat 4 has nothing to show
+- [ ] Gemini quota not exhausted — a 429 mid-recording kills the take
+      (`gemini-billing` was deliberately deferred to just before launch;
+      if the chat 500s, that's it)
+- [ ] Recorder captures the *window*, not the whole screen
+
+---
+
+## 5. Fallback: the generic version
 
 Record **one** take on `demo.html` (Skyline Realty Group) before Aug 18
 using the exact script above. It's the backstop for the reply that lands

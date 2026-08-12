@@ -30,9 +30,12 @@ yanıta elle ve düzgün cevap verilebilir.
 ## 1. Yanıt tipleri ve ne gider
 
 ### A. "Send it" / "Sure" / "Yes please" — asıl hedef
-`demo-video-script.md` §3'teki metin gider. Kişiselleştirilmiş video
-varsa o, yoksa generic (Skyline) sürüm. **Bekletme** — 5 dakika kuralı
-esas olarak bu kategori için var.
+`demo-video-script.md` §3'teki metin gider. Video **linksiz** taşınıyor:
+düz metin olarak `getboxagent.com` yazılır, video sayfanın en üstünde.
+Kişiselleştirilmiş sürüm çekildiyse onun yerine
+`getboxagent.com/v/<slug>` yazılır (sayfa şablonu:
+`landing/v/_template/`). **Bekletme** — 5 dakika kuralı esas olarak bu
+kategori için var.
 
 ### B. Video sonrası "looks good / how much?" — paraya en yakın an
 ```
@@ -64,8 +67,8 @@ Hi {FirstName},
 $149/month for the website widget, $399 if you also want the inbox
 side. $0 setup, 7-day free trial.
 
-Before that though — here's the 75-second video so you can see exactly
-what it does on {Company}'s site: {video link}
+Before that though — the 75-second video is at the top of
+getboxagent.com, and it's {Company}'s own site in it. No signup.
 
 Muhammet Karakaş
 InboxAgent | getboxagent.com
@@ -95,7 +98,7 @@ kısa bir `Removed — sorry for the interruption.` yeterli.
 ```
 Hi {FirstName},
 
-No deck — the video is the whole thing: {video link}
+No deck — the video is the whole thing, top of getboxagent.com.
 
 75 seconds, and it's your own site in it. If anything's unclear after
 that, just ask me here.
