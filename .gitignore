@@ -4,3 +4,8 @@
 node_modules/
 
 graphify-out/
+
+# Prospect data. This repo is PUBLIC (jsDelivr serves widget.js from it),
+# so real names/emails must never be committed.
+outreach/*.csv
+outreach/*.xlsx

@@ -71,35 +71,34 @@ bak). Ayrıca gönderen adresi olarak slogan gibi durup güven düşürüyordu.*
 `https://www.nevermisslead.com` — yerel hizmet işletmelerine lead yakalama
 platformu. **$149,99/ay + kurulum ücreti.**
 
-İlk fiyat kararında referans alınmıştı ama 28.07.2026'da fiyat $399/ay'a
-çıktı ve kurulum ücreti kaldırıldı — NeverMissLead'in bandı artık bizim
-fiyatımızın altında kalıyor, o daha ucuz/dar (sadece lead yakalama) bir
-ürün. Konumlandırma karşılaştırması için hâlâ geçerli referans.
+İlk fiyat kararında referans alınmıştı, sonra fiyat $399/ay'a çıkıp kurulum
+ücreti kaldırıldı; artık 3 katmanlı modelde (Website Widget $149/ay,
+Inbox Triage $299/ay, Both Bundled $399/ay) en alt katman NeverMissLead'in
+$149,99/ay'ına neredeyse denk — geniş kapsam (widget+inbox) ise sadece
+bundled katmanda öne çıkıyor. Konumlandırma karşılaştırması için hâlâ
+geçerli referans.
 
 ### Ödeme — bunsuz satış tahsil edilemez
 - [x] **Polar.sh hesabı açıldı** (31.07). Stripe ve PayPal Türkiye'de
       kayıtlı işletmeden ödeme kabul etmiyor. Polar Türkiye'yi açıkça
       destekliyor, Stripe Connect Express ile payout yapıyor.
       Detay: `Desktop\araştırma\abd-avrupa-satis-odeme-vergi.md`
-- [ ] Fiyatlandırma: **$399/ay + $0 kurulum + 3 ay minimum taahhüt**
-      (güncellendi 28.07.2026 — AI-otomasyon-ajansı pratikçi araştırması
-      sonrası). Kurulum ücreti kaldırıldı: `inboxagent` productized bir
-      sistem (aynı workflow her müşteriye kopyalanıyor), kurulum ücreti
-      "özel emek" izlenimi verip kuga.ai'nin tarif ettiği "hamster wheel"
-      itirazını (müşteri "neye ücret ödüyorum" der) davet ediyordu.
-      Detay: [[kurulum-ucreti-araştirmasi-2026-07]] (proje hafızası).
-      - İmza anında kart bilgisi alınır, **ilk ay ($399) hemen çekilir** —
-        kurulum ücretinin yaptığı "ciddiyetsiz müşteriyi ele" işini bu
-        görüyor.
-      - Sözleşmede 3 ay minimum madde: erken iptalde kalan ayların bedeli
-        fatura edilir. Ama asıl koruma bu madde değil — n8n workflow ve
-        widget kendi altyapımızda barınıyor, ödeme kesilirse erişim/
-        entegrasyon anında durdurulur (kill-switch).
-      - Aylık otomatik kart tahsilatı (Stripe/Polar) — iptal etmek için
-        müşteri harekete geçmeli, biz peşine düşmüyoruz.
-      - 3 ayı peşin ödeyene **%10 indirim** ($1.197 → ~$1.077) — gerçek
-        nakit + gerçek taahhüt bir arada.
-      - Alt paket gerekirse $129/ay (sadece widget).
+- [x] Fiyatlandırma — **3 katmanlı deneme modeline geçildi** (landing
+      sayfası `emlak-widget-global/landing/index.html` canlı hali, bu
+      $399/ay + 3 ay taahhüt modelinin yerini aldı):
+      - **Website Widget** $149/ay
+      - **Inbox Triage** $299/ay
+      - **Both, Bundled** (öne çıkan/"best value") $399/ay
+      - Üçünde de $0 kurulum, **7 gün ücretsiz deneme** (kart alınır ama
+        7 gün içinde iptal edilirse çekim yapılmaz), **30 gün içinde
+        memnun kalınmazsa tam iade**, istediğin zaman iptal — uzun vadeli
+        bağlayıcılık yok.
+      - 3 ay minimum taahhüt, peşin ödeme indirimi ve kill-switch
+        koruması artık **uygulanmıyor** — Polar checkout linki (bundled
+        katman) doğrudan bu deneme akışına bağlı.
+      - Eski gerekçe (kurulum ücretinin "hamster wheel" itirazını
+        davet etmesi) hâlâ geçerli, detay:
+        [[kurulum-ucreti-araştirmasi-2026-07]] (proje hafızası).
 
 ### Outreach — 28.07.2026'da revize edildi
 
@@ -180,7 +179,9 @@ gönderimini durdur, diğerlerine devam et. Hepsi %3-5 bandında kümeleniyorsa,
 "TX/FL'e özel doygunluk" teorisi çürütülmüş sayılır ve sonraki partilerde
 TX/FL ağırlıklı gidilebilir. Detay/gerekçe: `apollo-filters.md`.
 
-$399/ay fiyatla 4 müşteri = $1.596/ay + $0 kurulum. Hizmet
+Bundled katmanın ($399/ay) fiyatıyla 4 müşteri = $1.596/ay + $0 kurulum.
+Katmanlı yapı sayesinde düşük bütçeli lead'ler $149/ay'lık widget-only
+katmana düşüp tamamen kaybolmuyor. Hizmet
 ihracı istisnası 1/1/2026'dan itibaren %100 — yurt dışı kazanç gelir
 vergisinden tam istisna olabiliyor, ihracatta KDV %0.
 

@@ -1,0 +1,125 @@
+INSTANTLY'YE YAPISTIRMAK ICIN — Keyleads kampanyasi, Batch 1
+=============================================================
+
+NOT: Bu dosyada satirlar bilerek 80 karakterde SARILMADI. Mailin icinde
+cumle ortasinda satir atlamasin diye her paragraf tek satir. Kaynak metin
+email-sequence.md'de, orada sarili hali var. Ikisi ayni metin.
+
+NASIL: Asagidaki bloklarin icini fareyle sec -> Ctrl+C -> Instantly'de
+ilgili kutuya Ctrl+V. YAZMA, YAPISTIRMA yap. Elle yazarsan Instantly
+"{{" gordugu anda bir menu acip metnin gerisini yutuyor.
+
+
+#############################################################
+# STEP 1  (Gun 0)
+#############################################################
+
+--- KONU (Subject kutusuna) -------------------------------
+
+Quick question about missed leads on {{companyName}}'s website
+
+--- GOVDE (buyuk metin kutusuna) --------------------------
+
+Hi {{firstName}},
+
+I noticed {{companyName}}'s site doesn't have a live chat — most visitors who aren't ready to call just leave, and that's lead volume you're already paying for (SEO/ads) but never capturing.
+
+I put together a short video showing exactly how an AI chat widget would work on {{companyName}}'s site — figures out if a visitor's buying, selling, or renting, asks about budget/area, then gets you their contact info right away.
+
+Want me to send it over?
+
+Muhammet Karakaş
+InboxAgent | getboxagent.com
+
+Atatürk Bulvarı No:155, Nazilli/Aydın, Türkiye
+
+--- AYAR --------------------------------------------------
+"Send next message in" = 3 Days
+
+
+#############################################################
+# STEP 2  (Gun 3)
+#############################################################
+
+--- KONU: BOS BIRAK. Hicbir sey yazma. -------------------
+(Bos konu = ayni yazismaya eklenir. "Re:" yazarsan yeni bir
+ mail acilir ve sahte "Re:" gibi gorunur.)
+
+--- GOVDE -------------------------------------------------
+
+Hi {{firstName}},
+
+Following up in case this got buried.
+
+Still happy to send that short video showing how it'd work on {{companyName}}'s site — just reply "send it" and I'll get it over to you.
+
+Muhammet Karakaş
+InboxAgent | getboxagent.com
+
+Atatürk Bulvarı No:155, Nazilli/Aydın, Türkiye
+
+--- AYAR --------------------------------------------------
+"Send next message in" = 4 Days
+
+
+#############################################################
+# STEP 3  (Gun 7)
+#############################################################
+
+--- KONU: BOS BIRAK ---------------------------------------
+
+--- GOVDE -------------------------------------------------
+
+Hi {{firstName}},
+
+Quick add to my last note: the same system also covers the other side — when a lead emails {{companyName}} directly, it reads the email, drafts a reply, and flags anything that looks like a hot lead so it doesn't sit behind newsletters and CC threads.
+
+Still happy to send the short video walkthrough if it's useful — just say the word.
+
+Muhammet Karakaş
+InboxAgent | getboxagent.com
+
+Atatürk Bulvarı No:155, Nazilli/Aydın, Türkiye
+
+--- AYAR --------------------------------------------------
+"Send next message in" = 7 Days
+
+
+#############################################################
+# STEP 4  (Gun 14) — vazgecis maili
+#############################################################
+
+--- KONU: BOS BIRAK ---------------------------------------
+
+--- GOVDE -------------------------------------------------
+
+Hi {{firstName}},
+
+Haven't heard back, so I'll assume the timing isn't right — I'll stop following up after this one.
+
+If missed leads (on the site or in the inbox) ever become a priority for {{companyName}}, just reply to this email and I'll send over the video.
+
+Muhammet Karakaş
+InboxAgent | getboxagent.com
+
+Atatürk Bulvarı No:155, Nazilli/Aydın, Türkiye
+
+--- AYAR --------------------------------------------------
+Son adim, arkasina bir sey gelmiyor.
+
+
+#############################################################
+# 4 ADIM BITTIKTEN SONRA
+#############################################################
+
+1) OPTIONS sekmesi -> "Open tracking" ve "Link tracking" ikisini de KAPAT.
+   Instantly bunlari varsayilan acik tutuyor; piksel ve link sarmalayici
+   ekliyor, Gmail bunu promosyon maili sanip spam'e atiyor.
+
+2) OPTIONS sekmesi -> unsubscribe/opt-out linkinin acik oldugunu dogrula
+   (CAN-SPAM icin zorunlu, mail basina 51.744$ ceza riski).
+
+3) Kampanya adini duzelt: "TX Real Estate Brokerages" yaziyor ama liste
+   TX/FL/GA/NC. Ornek: "Keyleads – US Real Estate – Batch 1 (TX/FL/GA/NC)"
+
+4) Launch'a BASMA. Once bana soyle, birlikte son kontrol edelim.

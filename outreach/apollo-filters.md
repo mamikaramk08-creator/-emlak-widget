@@ -28,15 +28,28 @@ Use this exact filter set for the first lead-list pull.
   corporate, Coldwell Banker corporate, etc.) — independents only
 - **Email:** verified email required
 
-## Manual secondary pass (mandatory for the first batch)
+## Chat-widget pass — automated (2026-08-08)
 
-Spot-check each prospect's website for an existing live-chat widget
-(Intercom / Drift / Tidio / etc. script tags) and **drop** (not just
-deprioritize) agencies that already have one. This is the strongest
-available signal for standing out from the generic "AI chatbot" pitch
-flooding this vertical — more important than which state a lead is in — so
-for the first batch it's a required filter, not an optional pass. Do this by
-hand rather than building automation for it yet.
+Run `node check-widgets.mjs` in this folder: fetches every lead's homepage,
+greps for ~29 live-chat vendors' script tags, fills `has_chat_widget`.
+910 leads in ~1 minute. Do NOT do this by hand (an earlier version of this
+file said to — it was wrong; the pass elimination is only ~5%, nowhere near
+worth 910 manual page loads).
+
+Existing chat is **not** a disqualifier — we sell the widget *and* the
+inbox agent, so those leads go to a separate batch whose day-0 email leads
+with the inbox angle. It only disqualifies a lead from **Email 1 as
+written**, whose opening line asserts the prospect has no live chat.
+
+First-batch result: 704 no chat, 46 have one, 160 unscannable (68 of those
+are 403 bot-blocks — site is fine, we just couldn't read it; those ship in
+batch 1, ~6% of them will have chat). Splits:
+
+- `leads-batch1-send.csv` — 831 (TX 314 / FL 180 / GA 171 / NC 166).
+  Gets Email 1 as written.
+- `leads-batch2-haschat.csv` — 46. Needs a rewritten opening line first.
+- `leads-dead.csv` — 33 dropped. Domain doesn't resolve or 404s, so the
+  email will bounce too.
 
 ## Batch size
 
