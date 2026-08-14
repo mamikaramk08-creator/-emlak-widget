@@ -13,3 +13,6 @@ graphify-out/
 # prospect who searches a phrase from one of our emails must not land on our
 # playbook. Only what the widget itself needs is tracked.
 outreach/
+
+# Demo video (3.3 MB) — already public on the live site, no need in git.
+landing/assets/
