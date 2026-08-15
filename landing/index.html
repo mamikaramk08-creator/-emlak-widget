@@ -177,6 +177,8 @@
     box-shadow: 0 18px 50px rgba(15,23,42,.12);
   }
   .demo-note { text-align: center; color: #666; font-size: 14px; margin: 20px auto 0; }
+  .inbox-flow .hero-widget-mock { width: 100%; max-width: 340px; }
+  .inbox-flow .kicker { text-align: center; margin-bottom: 12px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
   .card { border: 1px solid #ece5d8; border-radius: 12px; background: #fff; padding: 26px; transition: transform .15s ease, box-shadow .15s ease; }
   .card:hover { transform: translateY(-3px); box-shadow: 0 16px 32px rgba(15,23,42,.1); }
@@ -260,7 +262,8 @@
 <header>
   <a class="logo" href="#">getboxagent</a>
   <nav>
-    <a href="#demo">Demo</a>
+    <a href="https://mamikaramk08-creator.github.io/-emlak-widget/demo.html" target="_blank" rel="noopener">Demo</a>
+    <a href="#inbox">Inbox</a>
     <a href="#use-cases">Use cases</a>
     <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
@@ -325,6 +328,61 @@
   <p class="demo-note">Prefer to poke at it yourself? <a href="https://mamikaramk08-creator.github.io/-emlak-widget/demo.html">Open the live demo</a> and chat with the widget for real.</p>
 </section>
 
+<section class="block reveal" id="inbox">
+  <span class="eyebrow" style="text-align:center; display:block;">The other half</span>
+  <h2>The leads that never touch your website.</h2>
+  <p class="lead">Portal alerts, referrals, old contacts — they land in your inbox at 9pm, in the same pile as newsletters and invoices. Inbox triage reads every one, drafts the reply, and puts the real ones on top.</p>
+  <div class="grid inbox-flow">
+    <div>
+      <div class="kicker">1 &middot; It lands</div>
+      <div class="hero-widget-mock">
+        <div class="hwm-header">
+          <span class="hwm-dot"></span>
+          <div>
+            <strong>New email</strong>
+            <span>9:14pm &middot; buried at #14</span>
+          </div>
+        </div>
+        <div class="hwm-body">
+          <div class="hwm-bubble">Hi — we're thinking about listing our place on Maple St this fall. Could you tell us roughly what it would go for?</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="kicker">2 &middot; It gets a draft</div>
+      <div class="hero-widget-mock">
+        <div class="hwm-header">
+          <span class="hwm-dot"></span>
+          <div>
+            <strong>Draft ready</strong>
+            <span>waiting for your approval</span>
+          </div>
+        </div>
+        <div class="hwm-body">
+          <div class="hwm-bubble">Happy to help — Maple St has moved quickly this year. Could I ask when you'd want to be on the market, and whether you've had any work done since you bought?</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="kicker">3 &middot; It reaches you sorted</div>
+      <div class="hero-widget-mock">
+        <div class="hwm-header">
+          <span class="hwm-dot"></span>
+          <div>
+            <strong>Flagged: seller lead</strong>
+            <span>top of your list, not #14</span>
+          </div>
+        </div>
+        <div class="hwm-body">
+          <div class="hwm-bubble">Listing opportunity &middot; Maple St &middot; timeline: this fall</div>
+          <div class="hwm-chips"><span>Seller</span><span>Valuation</span><span>Hot</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="demo-note">Nothing sends on its own — every reply waits for your approval. Runs on the inbox you already use.</p>
+</section>
+
 <section class="block reveal" id="use-cases">
   <span class="eyebrow" style="text-align:center; display:block;">Why brokerages switch</span>
   <h2>Built for how real estate leads actually come in</h2>
@@ -373,7 +431,7 @@
 <section class="block reveal" id="pricing">
   <span class="eyebrow" style="text-align:center; display:block;">Simple, transparent pricing</span>
   <h2>Pick what you need.</h2>
-  <p class="lead">Website widget, inbox triage, or both — start with what solves your biggest bottleneck today.</p>
+  <p class="lead">Most brokerages take both — the site and the inbox leak leads at the same time, usually the same evening. You can also start with one and add the other later.</p>
   <div class="trust-strip" style="margin-bottom: 32px;">
     <div class="stat"><strong>30 days</strong> money-back guarantee</div>
     <div class="stat"><strong>$0</strong> setup fee</div>
@@ -392,20 +450,8 @@
       <a class="cta" href="https://buy.polar.sh/polar_cl_y4LuqhHBYCCEuDQbd1rRLPvOLwDsXAWlGcZ861A2M0E" target="_blank" rel="noopener">Start free trial</a>
       <p class="pricing-note">Card required to start your trial — cancel anytime in the first 7 days and you won't be charged.</p>
     </div>
-    <div class="pricing-card">
-      <h3>Inbox Triage</h3>
-      <div class="pricing-amount">$299<span>/month</span></div>
-      <div class="pricing-sub">$0 setup &middot; 7-day free trial</div>
-      <ul class="pricing-features">
-        <li>AI inbox triage &amp; drafted replies</li>
-        <li>Hot leads flagged first</li>
-        <li>Works with your existing inbox</li>
-      </ul>
-      <a class="cta" href="mailto:mamikaramk08@gmail.com?subject=Inbox%20Triage%20plan">Start free trial</a>
-      <p class="pricing-note">Card required to start your trial — cancel anytime in the first 7 days and you won't be charged.</p>
-    </div>
     <div class="pricing-card featured">
-      <span class="badge">Best value</span>
+      <span class="badge">Most popular</span>
       <h3>Both, Bundled</h3>
       <div class="pricing-amount">$399<span>/month</span></div>
       <div class="pricing-sub">$0 setup &middot; 7-day free trial</div>
@@ -416,6 +462,18 @@
         <li>Live in under 5 minutes, no developer needed</li>
       </ul>
       <a class="cta" href="https://buy.polar.sh/polar_cl_aNykpGfZGJ5VFqFWQq0JQMeYJJP4d980ThKq40vn764" target="_blank" rel="noopener">Start free trial</a>
+      <p class="pricing-note">Card required to start your trial — cancel anytime in the first 7 days and you won't be charged.</p>
+    </div>
+    <div class="pricing-card">
+      <h3>Inbox Triage</h3>
+      <div class="pricing-amount">$299<span>/month</span></div>
+      <div class="pricing-sub">$0 setup &middot; 7-day free trial</div>
+      <ul class="pricing-features">
+        <li>AI inbox triage &amp; drafted replies</li>
+        <li>Hot leads flagged first</li>
+        <li>Works with your existing inbox</li>
+      </ul>
+      <a class="cta" href="https://buy.polar.sh/polar_cl_TAUzRyx724NuZyHRm5BYGZiZY1OnrBJwLcqIv1AG9mT" target="_blank" rel="noopener">Start free trial</a>
       <p class="pricing-note">Card required to start your trial — cancel anytime in the first 7 days and you won't be charged.</p>
     </div>
   </div>
