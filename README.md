@@ -17,8 +17,10 @@ just pastes two `<script>` tags into their site.
   `widget.js`, which runs in every visitor's browser.
 - `demo.html` — a fake agency landing page with the real widget embedded, for
   demoing to prospects.
-- `admin.html` — a simple lead-viewing dashboard (host this publicly too, or
-  just open it locally). Lets you pull stored leads for a tenant.
+- `landing/panel.html` — a simple lead-viewing dashboard, served at
+  `getboxagent.com/panel`. Pulls stored leads for one tenant. A customer gets
+  their own per-tenant `adminKey`, never the global `ADMIN_KEY` — see the
+  `TENANTS` comment in `worker.js`.
 
 ## 1. Deploy the Worker (one-time setup)
 
@@ -33,8 +35,9 @@ just pastes two `<script>` tags into their site.
    - `GEMINI_API_KEY` — your Google Gemini API key
    - `RESEND_API_KEY` — your Resend API key (sign up free at resend.com)
    - `ADMIN_KEY` — any secret string you make up yourself (e.g. a long random
-     password). This protects the `/leads` dashboard endpoint below — anyone
-     with this key can read stored leads, so keep it private.
+     password). This is the master key for the `/leads` dashboard endpoint
+     below: it opens **every** tenant's leads, so it is yours alone. Customers
+     get a per-tenant `adminKey` in `TENANTS` instead.
 5. Note the worker's URL, shown at the top of the dashboard:
    `https://realestate-widget-api.<your-subdomain>.workers.dev`
 
@@ -68,8 +71,8 @@ real customer**, since their leads otherwise silently fail to arrive.
 
 By default, leads are only ever delivered by email — if an email bounces,
 gets lost, or lands in spam, that lead is gone for good. Adding a Cloudflare
-KV namespace stores every lead as a backup you can browse anytime with
-`admin.html`.
+KV namespace stores every lead as a backup you can browse anytime in the lead
+panel.
 
 1. In the Cloudflare dashboard, go to **Storage & Databases → KV** → **Create
    namespace**. Name it anything, e.g. `realestate-leads`.
@@ -77,9 +80,9 @@ KV namespace stores every lead as a backup you can browse anytime with
    namespace**. Set the variable name to exactly `LEADS_KV` and select the
    namespace you just created. Save.
 3. Make sure you've also added the `ADMIN_KEY` secret from step 4 above.
-4. Open `admin.html` (locally, or host it wherever you host `widget.js`) and
-   fill in your worker URL, a `tenantId`, and your `ADMIN_KEY` — click
-   **Getir** to see that tenant's stored leads.
+4. Open `getboxagent.com/panel` (or `landing/panel.html` locally) and fill in
+   your worker URL, a `tenantId`, and your `ADMIN_KEY` — click **Load leads**
+   to see that tenant's stored leads.
 
 If `LEADS_KV` isn't bound, everything still works exactly as before (email
 only) — the Worker skips KV storage silently.
@@ -161,6 +164,6 @@ Every field except `proxyBaseUrl`, `tenantId`, and `agencyName` is optional.
    there (session persistence).
 8. Leave the page open without clicking the bubble for ~8 seconds and confirm
    a small red pulse appears on it.
-9. If you've set up `LEADS_KV` and `ADMIN_KEY`, open `admin.html`, enter the
+9. If you've set up `LEADS_KV` and `ADMIN_KEY`, open the lead panel, enter the
    worker URL / tenant ID / admin key, and confirm the test lead you just
    generated shows up in the table.

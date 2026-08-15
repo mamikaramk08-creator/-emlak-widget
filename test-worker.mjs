@@ -1,7 +1,7 @@
 // Run: node test-worker.mjs
 // Guards the tenant-isolation rules that are easy to break by accident.
 import assert from 'node:assert';
-import { originAllowed, TENANTS, buildSystemInstruction } from './worker.js';
+import { originAllowed, leadsKeyAllowed, TENANTS, buildSystemInstruction } from './worker.js';
 
 const req = (origin) => ({
   headers: { get: (h) => (h === 'Origin' && origin ? origin : null) }
@@ -24,6 +24,22 @@ assert.strictEqual(originAllowed(req(null), locked), false);
 for (const slug of Object.keys(TENANTS)) {
   assert.ok(!slug.includes(':'), `tenant slug must not contain ':' -> ${slug}`);
 }
+
+// Lead panel access: a customer's key opens only their own tenant, ours opens
+// all of them, and a tenant with its own key is closed to everyone else's.
+const env = { ADMIN_KEY: 'owner-key' };
+const acme = { adminKey: 'acme-key' };
+const other = { adminKey: 'other-key' };
+const keyless = {};
+assert.strictEqual(leadsKeyAllowed('acme-key', acme, env), true);
+assert.strictEqual(leadsKeyAllowed('acme-key', other, env), false);
+assert.strictEqual(leadsKeyAllowed('acme-key', keyless, env), false);
+assert.strictEqual(leadsKeyAllowed('owner-key', acme, env), true);
+assert.strictEqual(leadsKeyAllowed('owner-key', keyless, env), true);
+assert.strictEqual(leadsKeyAllowed('', acme, env), false);
+// An unset ADMIN_KEY must not turn an empty/undefined key into a valid one.
+assert.strictEqual(leadsKeyAllowed('', keyless, {}), false);
+assert.strictEqual(leadsKeyAllowed(undefined, keyless, {}), false);
 
 // A broker evaluating the widget must not get looped back into buy/sell/rent,
 // and the bot must not invent a company/team/security story about itself.

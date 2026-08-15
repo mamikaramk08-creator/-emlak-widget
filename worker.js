@@ -5,7 +5,8 @@
  * Set these secrets/vars in the Worker's Settings > Variables:
  *   GEMINI_API_KEY   - your Google Gemini API key
  *   RESEND_API_KEY   - your Resend API key
- *   ADMIN_KEY        - a secret you make up, protects the /leads endpoint
+ *   ADMIN_KEY        - a secret you make up, opens /leads for every tenant
+ *                      (customers get their own per-tenant adminKey instead)
  * Bind a KV namespace named LEADS_KV in Settings > Bindings (stores leads
  * so they're recoverable even if an email is lost, and viewable in admin.html).
  *
@@ -27,6 +28,9 @@ const GEMINI_MODEL = 'gemini-flash-lite-latest';
 //   allowedOrigins - array of exact origins allowed to call /chat and /lead
 //     for this tenant, e.g. ['https://acmerealty.com']. Omit it and any
 //     origin is accepted (this is what keeps demo.html working from file://).
+//   adminKey - required as soon as you hand this customer the lead panel.
+//     It is the only thing that stops them reading another tenant's leads
+//     with the same URL. Make up a long random string, one per customer.
 //
 // Never put ':' in a tenant slug — lead keys in KV are prefixed `slug:` and a
 // slug containing ':' would let one tenant's prefix match another's leads.
@@ -35,7 +39,8 @@ const TENANTS = {
   // 'customer-slug': {
   //   notifyEmail: 'customer@example.com',
   //   agencyName: 'Acme Realty',
-  //   allowedOrigins: ['https://acmerealty.com', 'https://www.acmerealty.com']
+  //   allowedOrigins: ['https://acmerealty.com', 'https://www.acmerealty.com'],
+  //   adminKey: 'long-random-string-unique-to-this-customer'
   // }
 };
 
@@ -85,6 +90,16 @@ function originAllowed(request, tenant) {
   if (!tenant.allowedOrigins) return true;
   const origin = request.headers.get('Origin');
   return !!origin && tenant.allowedOrigins.indexOf(origin) !== -1;
+}
+
+// Who may read /leads for this tenant: the customer with their own adminKey, or
+// us with the global ADMIN_KEY. Hand a customer the global key and they can read
+// every other tenant's leads by editing the tenantId in the URL, so any customer
+// who gets the lead panel must be given a per-tenant adminKey.
+function leadsKeyAllowed(key, tenant, env) {
+  if (!key) return false;
+  if (tenant.adminKey && key === tenant.adminKey) return true;
+  return !!env.ADMIN_KEY && key === env.ADMIN_KEY;
 }
 
 function buildSystemInstruction(agencyName, agencyBlurb) {
@@ -332,12 +347,13 @@ async function handleLeads(request, env) {
   const tenantId = (url.searchParams.get('tenantId') || '').toString().slice(0, 100);
   const key = url.searchParams.get('key') || '';
 
-  if (!env.ADMIN_KEY || key !== env.ADMIN_KEY) {
-    return jsonResponse({ error: 'Forbidden' }, 403);
+  const tenant = TENANTS[tenantId];
+  if (!tenant) {
+    return jsonResponse({ error: 'Unknown tenant' }, 403);
   }
 
-  if (!TENANTS[tenantId]) {
-    return jsonResponse({ error: 'Unknown tenant' }, 403);
+  if (!leadsKeyAllowed(key, tenant, env)) {
+    return jsonResponse({ error: 'Forbidden' }, 403);
   }
 
   if (!env.LEADS_KV) {
@@ -362,7 +378,7 @@ async function handleLeads(request, env) {
   return jsonResponse({ leads: leads });
 }
 
-export { originAllowed, TENANTS, buildSystemInstruction };
+export { originAllowed, leadsKeyAllowed, TENANTS, buildSystemInstruction };
 
 export default {
   async fetch(request, env) {
