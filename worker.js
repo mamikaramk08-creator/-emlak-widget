@@ -39,7 +39,7 @@ const TENANTS = {
   // }
 };
 
-const FROM_EMAIL = 'leads@notify.getboxagent.com';
+const FROM_EMAIL = 'leads@getboxagent.com';
 
 function corsHeaders() {
   return {
@@ -106,12 +106,29 @@ function buildSystemInstruction(agencyName, agencyBlurb) {
     'other language. Never switch language on your own.\n' +
     'DO NOT REPEAT QUESTIONS: Before asking something, check the conversation so far — if the visitor ' +
     'already gave that piece of information (even if they volunteered several things at once in a single ' +
-    'message), do not ask for it again. Skip straight to the next unanswered question.\n' +
+    'message), do not ask for it again. Skip straight to the next unanswered question. If they declined a ' +
+    'question or said it does not apply to them, that question is closed for the rest of the conversation — ' +
+    'never ask it again, not even reworded.\n' +
     'ACKNOWLEDGE, THEN ASK: Briefly acknowledge what the visitor just told you in your own words before ' +
     'asking the next question, so the conversation feels natural rather than like a form being filled in.\n' +
+    'NOT EVERY VISITOR IS A PROSPECT: Some visitors are not buyers, sellers, or renters — a real estate ' +
+    'agent or broker evaluating this chat tool, an agent representing the other side of a deal, a vendor ' +
+    'pitching something, a recruiter, a wrong number, or spam. As soon as that is clear, STOP asking the ' +
+    'qualification questions and do NOT steer the conversation back to buying, selling, or renting. Answer ' +
+    'briefly and honestly, then point them to the right channel: invite them to contact the ' + agencyName +
+    ' office directly. Only go back to the qualification questions if the visitor raises a property need ' +
+    'themselves. Never emit the lead marker for such a visitor.\n' +
+    'NEVER INVENT FACTS ABOUT YOURSELF: You are an AI assistant working on behalf of ' + agencyName + '. ' +
+    'If asked directly whether you are a human or a bot, say plainly that you are an AI assistant. Never ' +
+    'claim anything you cannot verify — no "our team", "our company", "our servers", "enterprise-grade ' +
+    'security", no certifications, no claims about who built this chat widget, where it runs, or how data ' +
+    'is stored or protected. If asked about the widget itself, its vendor, pricing, or data handling, say ' +
+    'you do not have that information and refer them to the office, or to getboxagent.com for the tool ' +
+    'itself.\n' +
     'OFF-TOPIC MESSAGES: If the visitor asks something unrelated to real estate (small talk, unrelated ' +
     'questions, etc.), answer briefly and politely, then gently steer the conversation back to whichever ' +
-    'question is still unanswered.\n' +
+    'question is still unanswered — unless they are not a prospect, in which case leave the qualification ' +
+    'questions alone.\n' +
     'IMPORTANT: As soon as you have collected a name AND a phone number or email address, append ' +
     'this exact hidden marker at the very end of your reply, on its own, with real values filled in ' +
     'as compact single-line JSON (the visitor will never see this marker, it is stripped automatically):\n' +
@@ -345,7 +362,7 @@ async function handleLeads(request, env) {
   return jsonResponse({ leads: leads });
 }
 
-export { originAllowed, TENANTS };
+export { originAllowed, TENANTS, buildSystemInstruction };
 
 export default {
   async fetch(request, env) {
